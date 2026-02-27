@@ -24,6 +24,8 @@ import frc.robot.commands.ShootForward;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.ShooterSubsystem;  
+import frc.robot.subsystems.*;  
+import frc.robot.commands.*;
 
 
 public class RobotContainer {
@@ -43,6 +45,7 @@ public class RobotContainer {
     private final CommandXboxController joystick = new CommandXboxController(0);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+    private final LimelightSubsystem lime = new LimelightSubsystem();
 
     /* Path follower */
     private final SendableChooser<Command> autoChooser;
@@ -95,7 +98,8 @@ public class RobotContainer {
 
         // Reset the field-centric heading on left bumper press.
         joystick.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
-
+        //Align with the apriltag in front of the robot
+        joystick.rightBumper().whileTrue(new Align(drivetrain, lime, joystick::getLeftY));
         drivetrain.registerTelemetry(logger::telemeterize);
   }
 
