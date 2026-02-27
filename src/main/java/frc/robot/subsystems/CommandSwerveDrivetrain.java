@@ -43,6 +43,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private static final double kSimLoopPeriod = 0.004; // 4 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
+    public double MaxSpeed = 4.65;
+    private double MaxAngularRate = 2.75 * Math.PI; 
 
     /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
     private static final Rotation2d kBlueAlliancePerspectiveRotation = Rotation2d.kZero;
@@ -294,6 +296,20 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             });
         }
     }
+
+         private final SwerveRequest.RobotCentric Botdrive = new SwerveRequest.RobotCentric()
+ /*.withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.05)*/; // Add a 10% deadband
+
+    public void RobotDrive(double UpDown, double LeftRight, double Rotate) {
+        this.setControl(Botdrive.withVelocityX(-UpDown * MaxSpeed) // Drive forward with
+                                                                                   // negative Y (forward)
+    .withVelocityY(-LeftRight * MaxSpeed) // Drive left with negative X (left)
+    //.withRotationalRate(-Rotate) // Drive counterclockwise with negative X (left)
+    .withRotationalRate(-Rotate * MaxAngularRate) // Drive counterclockwise with negative X (left)
+
+
+);
+}
 
     private void startSimThread() {
         m_lastSimTime = Utils.getCurrentTimeSeconds();
