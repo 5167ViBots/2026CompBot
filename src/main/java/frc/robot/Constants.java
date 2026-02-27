@@ -1,3 +1,7 @@
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
 package frc.robot;
 
 /**
@@ -65,4 +69,25 @@ public static class IndexConstants {
     public static final boolean INDEX_CURRENT_LIMIT_ENABLE = true;
    }
 
+  //Arrow
+  public static class arrowConstants{
+    public static final double kPstart = 15;
+    public static final double kDstart = 0.2;
+    public static final double kIstart = 0.0;
+    public static final double errorBand = 0.01;
+    public static final double kVstart = 0.0;
+
+    public static final double arrrowManualSpeed = 7;
+  }
+
+//Pigeon
+  public static class pigeonConstants{
+    public static final int Pigeon2 = 1;
+  }      
+
+//Speed/drive
+  public static class movementConstants{
+public static final double maxSpeed = 1.0;
+public static final double autonIdleTime = 5.0;
+  }
 }
