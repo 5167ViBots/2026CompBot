@@ -19,7 +19,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 //Caleb
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.HelperClasses.Constants.ShooterSubsystemConstants;
+import frc.robot.Constants.ShooterSubsystemConstants;
 
 public class ShooterSubsystem extends SubsystemBase {
   private TalonFX shooter1, shooter2;

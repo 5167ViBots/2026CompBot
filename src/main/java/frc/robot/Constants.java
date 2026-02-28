@@ -16,6 +16,8 @@ public final class Constants {
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
   }
+  
+    public static final String RioCanBus = "rio";
 
   public static class IntakeExtenderConstants{
     public static final int leaderExtenderID = 2;
@@ -68,6 +70,18 @@ public static class IndexConstants {
     public static final double INDEX_CURRENT_LIMIT = 30.0; // amps
     public static final boolean INDEX_CURRENT_LIMIT_ENABLE = true;
    }
+public static class ShooterSubsystemConstants {
+        public static final int ShooterMotor1ID = 11;
+        public static final String ShooterMotor1CAN = RioCanBus;
+        public static final int ShooterMotor2ID = 12;
+        public static final String ShooterMotor2CAN = RioCanBus;
+        public static final double kP = 2.4;
+        public static final double kI = 0;
+        public static final double kD = 0.1;
+        public static final double shooterspeed = 0.5;
+
+        //public static final Port distanceSensorPort = Port.kMXP;
+    }
 
    public static class IntakeConstants {
     public static final int IntakeMotorID = 199;
