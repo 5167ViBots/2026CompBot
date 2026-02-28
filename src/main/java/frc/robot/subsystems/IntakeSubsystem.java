@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 
 public class IntakeSubsystem extends SubsystemBase {
   TalonFX Intake;
@@ -21,7 +22,7 @@ public class IntakeSubsystem extends SubsystemBase {
   GenericEntry intakeValue;
 
   public IntakeSubsystem() {
-    Intake = new TalonFX(0);
+    Intake = new TalonFX(Constants.IntakeConstants.IntakeMotorID);
     
   }
 
