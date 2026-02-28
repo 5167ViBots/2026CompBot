@@ -69,6 +69,11 @@ public static class IndexConstants {
     public static final boolean INDEX_CURRENT_LIMIT_ENABLE = true;
    }
 
+   public static class IntakeConstants {
+    public static final int IntakeMotorID = 199;
+    public static final String IntakeMotorCANBus = "canivore";
+   }
+
   //Arrow
   public static class arrowConstants{
     public static final double kPstart = 15;
