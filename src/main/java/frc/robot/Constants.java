@@ -88,6 +88,14 @@ public static class ShooterSubsystemConstants {
     public static final String IntakeMotorCANBus = "canivore";
    }
 
+   public static class ClimberConstants {
+   public static final int Climber1ID = 0;
+   public static final int Climber2ID = 1;
+   public static final String Climber1CANBus = "canivore";
+   public static final String Climber2CANBus = "canivore";
+    
+   }
+
   //Arrow
   public static class arrowConstants{
     public static final double kPstart = 15;
