@@ -10,6 +10,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -19,10 +20,12 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-
-
+import frc.robot.commands.ShootForward;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.CommandSwerveDrivetrain;  
+import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.ShooterSubsystem;  
+import frc.robot.subsystems.*;  
+import frc.robot.commands.*;
 
 
 public class RobotContainer {
@@ -35,12 +38,14 @@ public class RobotContainer {
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
+    ShooterSubsystem shooty = new ShooterSubsystem();
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
     private final CommandXboxController joystick = new CommandXboxController(0);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+    private final LimelightSubsystem lime = new LimelightSubsystem();
 
     /* Path follower */
     private final SendableChooser<Command> autoChooser;
@@ -50,6 +55,13 @@ public class RobotContainer {
             autoChooser = AutoBuilder.buildAutoChooser("Tests");
         SmartDashboard.putData("Auto Mode", autoChooser);
     configureBindings();
+    registerPathPlannerCommands();
+  }
+
+
+    private void registerPathPlannerCommands() {
+
+    NamedCommands.registerCommand("Shoot", new ShootForward(shooty));
   }
 
   private void configureBindings() {
@@ -86,7 +98,8 @@ public class RobotContainer {
 
         // Reset the field-centric heading on left bumper press.
         joystick.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
-
+        //Align with the apriltag in front of the robot
+        joystick.rightBumper().whileTrue(new Align(drivetrain, lime, joystick::getLeftY));
         drivetrain.registerTelemetry(logger::telemeterize);
   }
 
