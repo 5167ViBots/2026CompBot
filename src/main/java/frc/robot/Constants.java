@@ -53,14 +53,14 @@ public final class Constants {
   }
   
 public static class IndexConstants {
-    public static final int horizontalIndexMotorID = 4;
+    public static final int horizontalIndexMotorID = 17;
     public static final String horizontalIndexMotorCANBus = "canivore";
 
-    public static final int verticalIndexMotorID = 5;
+    public static final int verticalIndexMotorID = 18;
     public static final String verticalIndexMotorCANBus = "canivore";
 
-    public static final int verticalIndexFollowerID = 6;
-    public static final String verticalIndexFollowerCANBus = "canivore";
+    // public static final int verticalIndexFollowerID = 6;
+    // public static final String verticalIndexFollowerCANBus = "canivore";
 
     public static final boolean INVERT_FOLLOWER = false;
 
@@ -71,10 +71,10 @@ public static class IndexConstants {
     public static final boolean INDEX_CURRENT_LIMIT_ENABLE = true;
    }
 public static class ShooterSubsystemConstants {
-        public static final int ShooterMotor1ID = 11;
+        public static final int ShooterMotor1ID = 0;
         public static final String ShooterMotor1CAN = RioCanBus;
-        public static final int ShooterMotor2ID = 12;
-        public static final String ShooterMotor2CAN = RioCanBus;
+        // public static final int ShooterMotor2ID = 12;
+        // public static final String ShooterMotor2CAN = RioCanBus;
         public static final double kP = 2.4;
         public static final double kI = 0;
         public static final double kD = 0.1;

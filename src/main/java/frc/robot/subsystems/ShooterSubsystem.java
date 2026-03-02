@@ -22,15 +22,15 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ShooterSubsystemConstants;
 
 public class ShooterSubsystem extends SubsystemBase {
-  private TalonFX shooter1, shooter2;
+  private TalonFX shooter1;
  // private Rev2mDistanceSensor distanceSensor;
   /** Creates a new ExampletuneSubsystem. */
   public ShooterSubsystem() {
     shooter1 = new TalonFX(ShooterSubsystemConstants.ShooterMotor1ID, ShooterSubsystemConstants.ShooterMotor1CAN);
-    shooter2 = new TalonFX(ShooterSubsystemConstants.ShooterMotor2ID, ShooterSubsystemConstants.ShooterMotor2CAN);
+    // shooter2 = new TalonFX(ShooterSubsystemConstants.ShooterMotor2ID, ShooterSubsystemConstants.ShooterMotor2CAN);
     shooter1.setNeutralMode(NeutralModeValue.Brake);
-    shooter2.setNeutralMode(NeutralModeValue.Brake);
-    shooter2.setControl(new Follower(shooter1.getDeviceID(), MotorAlignmentValue.Opposed));
+    // shooter2.setNeutralMode(NeutralModeValue.Brake);
+    // shooter2.setControl(new Follower(shooter1.getDeviceID(), MotorAlignmentValue.Opposed));
    // distanceSensor = null;// new Rev2mDistanceSensor(ShooterSubsystemConstants.distanceSensorPort);
 
    var slot0Configs = new Slot0Configs();
@@ -77,7 +77,7 @@ shooter1.setControl(m_request.withVelocity(speed).withFeedForward(0.5));
 
   public void warmUp(){
     shooter1.set(1);
-    shooter2.set(1);
+    // shooter2.set(1);
   }
 
   public void warmDown(){
