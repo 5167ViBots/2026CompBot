@@ -8,11 +8,13 @@ import static edu.wpi.first.units.Units.*;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
-
+import com.ctre.phoenix6.swerve.jni.SwerveJNI.DriveState;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -106,5 +108,24 @@ public class RobotContainer {
     public Command getAutonomousCommand() {
         /* Run the path selected from the auto chooser */
         return autoChooser.getSelected();
-    }                   
+    }              
+    
+    public void resetPoseFromLimelight(){
+        LimelightSubsystem LL = lime;
+        Timer.delay(0.3);
+        for (int i = 0; i < 3; i++){
+            if (LL.hasValidTarget() && LL.getLatestTimestamp() > 0){
+            drivetrain.resetPose(LL.getLatestPose());
+            return;
+            }
+            Timer.delay(0.1);
+        }
+        if (DriverStation.getAlliance().isPresent(){
+            drivetrain.resetPose(Constants.FeildConstants.LEFT_TRENCH_START);
+        }
+    }
+
+    public void updatePeriodic(){
+
+    }
 }
