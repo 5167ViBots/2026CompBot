@@ -9,7 +9,7 @@ public class IntakeExtenderDown extends Command {
   private final IntakeExtender m_subsystem;
 
   /**
-   * Creates a new ExampleCommand.
+   * Creates a new ExampleCommand.  
    *
    * @param subsystem The subsystem used by this command.
    */
