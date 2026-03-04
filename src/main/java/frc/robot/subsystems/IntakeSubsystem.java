@@ -3,39 +3,24 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.subsystems;
+import frc.robot.Constants;
 
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 
-import edu.wpi.first.networktables.GenericEntry;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardComponent;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
+
+import frc.robot.ShuffleboardControl;
 
 public class IntakeSubsystem extends SubsystemBase {
-  TalonFX Intake;
-  ShuffleboardTab intakeTab = Shuffleboard.getTab("Input");
-  GenericEntry intakeValue;
+  /** Creates a new ExampleSubsystem. */
+  private TalonFX intakeMotor1;
 
   public IntakeSubsystem() {
-    Intake = new TalonFX(Constants.IntakeConstants.IntakeMotorID);
-    
-  }
 
-  public void IntakeRun() {
-    Intake.setControl(new DutyCycleOut (.4));
-  }
+    intakeMotor1 = new TalonFX(Constants.IntakeConstants.intakeMotor1ID, Constants.IntakeConstants.intakemotor1CANBus);
 
-  public void IntakeStop() {
-    Intake.setControl(new DutyCycleOut (0));
-  }
-
-  public void IntakeReverse() {
-    Intake.setControl(new DutyCycleOut (-.4));
   }
 
   /**
@@ -43,13 +28,33 @@ public class IntakeSubsystem extends SubsystemBase {
    *
    * @return a command
    */
-  public Command exampleMethodCommand() {
+  public Command intakeSubsystemCommand() {
     // Inline construction of command goes here.
     // Subsystem::RunOnce implicitly requires `this` subsystem.
     return runOnce(
         () -> {
           /* one-time action goes here */
         });
+  }
+ 
+  public void setPower(double powerPercent){
+    intakeMotor1.setControl(new DutyCycleOut(powerPercent));
+  }
+
+  public double getPower(){
+    return intakeMotor1.getDutyCycle().getValueAsDouble();
+  }
+  
+  public void intake(){
+    setPower(Constants.IntakeConstants.INTAKE_POWER_PERCENT);
+  }
+
+  public void stop(){
+    setPower(0.0);
+  }
+
+  public void reverseIntake(){
+    setPower(-Constants.IntakeConstants.INTAKE_POWER_PERCENT);
   }
 
   /**
@@ -64,11 +69,13 @@ public class IntakeSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    intakeValue = intakeTab.add("Input", 0).getEntry();
+    // This method will be called once per scheduler run
+
   }
 
   @Override
   public void simulationPeriodic() {
     // This method will be called once per scheduler run during simulation
   }
+
 }

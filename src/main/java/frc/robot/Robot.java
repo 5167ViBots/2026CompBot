@@ -6,98 +6,107 @@ package frc.robot;
 
 import com.ctre.phoenix6.HootAutoReplay;
 
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.commands.TurretHomeCommand;
+
+import frc.robot.Constants;
 
 public class Robot extends TimedRobot {
-  private Command m_autonomousCommand;
+    private Command m_autonomousCommand;
 
-  private final RobotContainer m_robotContainer;
-
-          private final boolean kUseLimelight = false;
+    private final RobotContainer m_robotContainer;
 
     /* log and replay timestamp and joystick data */
     private final HootAutoReplay m_timeAndJoystickReplay = new HootAutoReplay()
         .withTimestampReplay()
         .withJoystickReplay();
 
-  public Robot() {
-    m_robotContainer = new RobotContainer();
-  }
+    public Robot() {
+        m_robotContainer = new RobotContainer();
 
-  @Override
-  public void robotPeriodic() {
-    m_timeAndJoystickReplay.update();
-    CommandScheduler.getInstance().run();
+        // Update Shuffleboard every 100 ms, offset 5 ms
+        addPeriodic(ShuffleboardControl::update, 0.020, 0.005);
 
-        /*
-         * This example of adding Limelight is very simple and may not be sufficient for on-field use.
-         * Users typically need to provide a standard deviation that scales with the distance to target
-         * and changes with number of tags available.
-         *
-         * This example is sufficient to show that vision integration is possible, though exact implementation
-         * of how to use vision should be tuned per-robot and to the team's specification.
-         */
-        if (kUseLimelight) {
-            var driveState = m_robotContainer.drivetrain.getState();
-            double headingDeg = driveState.Pose.getRotation().getDegrees();
-            double omegaRps = Units.radiansToRotations(driveState.Speeds.omegaRadiansPerSecond);
+        // Update field & pose every 20 ms, offset 5 ms.
+        addPeriodic(m_robotContainer::updateFieldAndPoseDisplay, 0.020, 0.005);
+        
+        // Check limelight every 100 ms, offset 10 ms.
+        addPeriodic(m_robotContainer.getLimelight()::periodic, 0.100, 0.10);
 
-            LimelightHelpers.SetRobotOrientation("limelight-doug", headingDeg, 0, 0, 0, 0, 0);
-            var llMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-doug");
-            if (llMeasurement != null && llMeasurement.tagCount > 0 && Math.abs(omegaRps) < 2.0) {
-                m_robotContainer.drivetrain.addVisionMeasurement(llMeasurement.pose, llMeasurement.timestampSeconds);
-            }
+        // update swerve odometry with Limelight vision every 100 ms, offset 35 ms.
+        addPeriodic(m_robotContainer::updatePoseWithVision, 0.100, 0.035);
+    }
+
+    @Override
+    public void robotPeriodic() {
+        m_timeAndJoystickReplay.update();
+        CommandScheduler.getInstance().run(); 
+    }
+
+    @Override
+    public void disabledInit() {}
+
+    @Override
+    public void disabledPeriodic() {}
+
+    @Override
+    public void disabledExit() {}
+
+    @Override
+    public void autonomousInit() {
+        m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+
+        if (m_autonomousCommand != null) {
+            CommandScheduler.getInstance().schedule(m_autonomousCommand);
         }
-  }
-
-  @Override
-  public void disabledInit() {}
-
-  @Override
-  public void disabledPeriodic() {}
-
-  @Override
-  public void disabledExit() {}
-
-  @Override
-  public void autonomousInit() {
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
-
-    if (m_autonomousCommand != null) {
-      CommandScheduler.getInstance().schedule(m_autonomousCommand);
     }
-  }
 
-  @Override
-  public void autonomousPeriodic() {}
+    @Override
+    public void autonomousPeriodic() {}
 
-  @Override
-  public void autonomousExit() {}
+    @Override
+    public void autonomousExit() {}
 
-  @Override
-  public void teleopInit() {
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.cancel();
+    @Override
+    public void teleopInit() {
+        if (m_autonomousCommand != null) {
+            CommandScheduler.getInstance().cancel(m_autonomousCommand);
+        }
+        
+        // only initialize from limelight if "Initialization" constant is true (change in Constants.java)
+        // We will likely move this to AutonomousInit when we're confident that everything works well.
+        if (Constants.ENABLE_LIMELIGHT_INITIALIZATION) { 
+            m_robotContainer.resetPoseFromLimelight();
+        }
+
+        if (Constants.ENABLE_TURRET_HOMING){                                // only initialize turret if HOMING is true. (change in Constants.java)
+            CommandScheduler.getInstance().schedule(                        // eventually move this to AutonomousInit when we're done testing.
+                new TurretHomeCommand(m_robotContainer.getTurret())
+            );
+        }
     }
-  }
 
-  @Override
-  public void teleopPeriodic() {}
+    @Override
+    public void teleopPeriodic() {
+        // ShuffleboardControl.update();
+    }
 
-  @Override
-  public void teleopExit() {}
+    @Override
+    public void teleopExit() {}
 
-  @Override
-  public void testInit() {
-    CommandScheduler.getInstance().cancelAll();
-  }
+    @Override
+    public void testInit() {
+        CommandScheduler.getInstance().cancelAll();
+    }
 
-  @Override
-  public void testPeriodic() {}
+    @Override
+    public void testPeriodic() {}
 
-  @Override
-  public void testExit() {}
+    @Override
+    public void testExit() {}
+
+    @Override
+    public void simulationPeriodic() {}
 }

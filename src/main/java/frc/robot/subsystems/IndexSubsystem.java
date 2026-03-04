@@ -16,13 +16,13 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants;
 
-public class IndexerSubsystem extends SubsystemBase {
+public class IndexSubsystem extends SubsystemBase {
 
   private TalonFX horizontalIndexMotor;
   private TalonFX verticalIndexMotor;
 
   /** Creates a new IndexSubsystem. */
-  public IndexerSubsystem() {
+  public IndexSubsystem() {
 
     horizontalIndexMotor = new TalonFX(Constants.IndexConstants.horizontalIndexMotorID, Constants.IndexConstants.horizontalIndexMotorCANBus);
     verticalIndexMotor = new TalonFX(Constants.IndexConstants.verticalIndexMotorID, Constants.IndexConstants.verticalIndexMotorCANBus);
