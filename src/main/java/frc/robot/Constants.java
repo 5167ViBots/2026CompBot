@@ -73,9 +73,9 @@ public final class Constants {
   }
 
   public static class IntakeExtenderConstants{
-    public static final int leaderExtenderID = 48;
+    public static final int leaderExtenderID = 46;
     public static final String leaderExtenderCANBus = "rio";
-    public static final int followerExtenderID = 46;
+    public static final int followerExtenderID = 48;
     public static final String followerExtenderCANBus = "rio";
 
     public static final int IntakeGearRatio = 12;
@@ -83,23 +83,23 @@ public final class Constants {
     public static final int LEFT_ENCODER_DIO = 2;   // DIO port for left encoder (left = leader)
     public static final int RIGHT_ENCODER_DIO = 1;  // DIO port for right encoder
 
-    public static final double kP = 0.1;
-    public static final double kI = 0.0;
-    public static final double kD = 0.0;
+    public static final double kP = 5.0;
+    public static final double kI = 0.015;
+    public static final double kD = 0.25;
     public static final double kV = 0.0;
     public static final double kG = 0.0;
 
     public static final double MOTION_CRUISE_VELOCITY = 600;
     public static final double MOTION_ACCELERATION = 1200;
 
-    public static final double UP_POSITION_DEGREES = 0;
-    public static final double DOWN_POSITION_DEGREES = 90;
+    public static final double UP_POSITION = 0.33;
+    public static final double DOWN_POSITION = 0.0;
 
     public static final double POSITION_TOLERANCE_DEGREES = 2.0;
     public static final double MAX_CURRENT_AMPS = 40.0;
 
-    public static final boolean INVERT_LEADER_MOTOR = false;
-    public static final boolean INVERT_FOLLOWER_MOTOR = true;
+    public static final boolean INVERT_LEADER_MOTOR = true;
+    public static final boolean INVERT_FOLLOWER_MOTOR = false;
 
     public static final int ENCODER_TICKS_PER_REVOLUTION = 2048;
     public static final double SLEW_RATE_LIMITER = 3.0; // units per second
