@@ -120,6 +120,7 @@ public class RobotContainer {
 
         private GenericEntry robotStateEntry;
         private GenericEntry robotFieldEntry;
+        private GenericEntry robotDriveEntry;
         private GenericEntry robotPoseEntry;
         private GenericEntry turretAngleDisplay;
         private GenericEntry hoodAngleDisplay;
@@ -182,7 +183,7 @@ public class RobotContainer {
         return errorDeg > TurretConstants.LARGE_ERROR;
     });
 
-    private boolean isRobotRelative = false; // boolean to switch between fixed/field centric (false) and relative/robot centric (true)
+    private boolean isRobotRelative = true; // boolean to switch between fixed/field centric (false) and relative/robot centric (true)
 
     public RobotContainer() {
 
@@ -235,19 +236,19 @@ public class RobotContainer {
                 leftX = Math.abs(leftX) > deadband ? leftX : 0;
                 rightX = Math.abs(rightX) > deadband ? rightX : 0;
 
-                double vx = leftX * MaxSpeed;
+                double vx = -leftX * MaxSpeed;
                 double vy = leftY * MaxSpeed;
                 double omega = rightX * MaxAngularRate;
 
                 if(isRobotRelative) {
                     return new SwerveRequest.RobotCentric()
-                        .withVelocityX(vx)
-                        .withVelocityY(vy)
+                        .withVelocityX(vy)
+                        .withVelocityY(vx)
                         .withRotationalRate(omega);
                     } else {
                     return new SwerveRequest.FieldCentric()
-                        .withVelocityX(vx)
-                        .withVelocityY(vy)
+                        .withVelocityX(vy)
+                        .withVelocityY(vx)
                         .withRotationalRate(omega);
                 }    
 
@@ -265,13 +266,13 @@ public class RobotContainer {
         );
 
 
-        intake.setDefaultCommand(
-            Commands.run(intake::stop, intake)
-        ); // default to stopped when not called
+        // intake.setDefaultCommand(
+        //     Commands.run(intake::stop, intake)
+        // ); // default to stopped when not called
 
-        shooter.setDefaultCommand(
-            Commands.run(shooter::stop, shooter)
-        ); // default to stopped when not called
+        // shooter.setDefaultCommand(
+        //     Commands.run(shooter::stop, shooter)
+        // ); // default to stopped when not called
 
         intakeExtender.setDefaultCommand(
             Commands.run(intakeExtender::stop, intakeExtender)
@@ -345,7 +346,7 @@ public class RobotContainer {
 
         // isShooting pairs FOM and SAS
         // This trigger will activate when we first enter either the FIRE_ON_THE_MOVE or STOP_AND_SHOOT state, but not on subsequent scheduler runs while we're still in that state, due to the debounce.
-        
+
         isShootingTrigger()
             // .and(isShootingTrigger().negate().debounce(0.05))
             .onTrue(new IntakeExtenderDown(intakeExtender));
@@ -357,13 +358,14 @@ public class RobotContainer {
             new IntakeExtenderUp(intakeExtender)
         );
 
-        climbRaiseArmTrigger.whileTrue(new ClimberArmUpCommand(climber));
-        // climbTrigger().and(climbRaiseArmTrigger).whileTrue(new ClimberArmUpCommand(climber));
+        climbTrigger().and(climbRaiseArmTrigger).whileTrue(new ClimberArmUpCommand(climber));
         climbTrigger().and(climbLowerArmTrigger).whileTrue(new ClimberArmDownCommand(climber));
-
 
         // for fire on the  move, turn on intake, index, and shooter (unless we're unjamming)
         // If the turret is NOT reorienting, turn on index.
+
+        // FIX SIMILAR TO STOPANDSHOOTTRIGGER + INTAKE/FIRE BUTTON
+
         fireOnMoveTrigger().and(unJamActive.negate()).and(turretIsReorienting.negate()).whileTrue(
             Commands.parallel(
                 // new CANdleSetColorCommand(candle, CandleConstants.READY_TO_SHOOT_COLOR, CandleConstants.DEFAULT_STROBE_HZ), // flash "ready to shoot" (default green) while fire button is depressed
@@ -387,33 +389,27 @@ public class RobotContainer {
 
         // for stop and shoot, if we're not unjamming or shooting, turn on the intake, turn off shooter & index.
         stopAndShootTrigger()
-            .and(unJamActive.negate())
-            .and(fireButton().negate())
             .whileTrue(
             Commands.parallel(
                 // new CANdleSetColorCommand(candle, Constants.CandleConstants.READY_TO_SHOOT_COLOR, Constants.CandleConstants.NO_STROBE),
                 new ShooterContinuousCommand(shooter),
-                new IndexStopCommand(index),
                 new IntakeForwardCommand(intake)
             )
         );
 
         // for stop and shoot, if the fire button is being held, turn everything on
-        stopAndShootTrigger()
-            .and(fireButton())
+        fireButton()
+            .and(isShootingTrigger())
             .and(unJamActive.negate())
             .whileTrue(
             Commands.parallel(
                 // new CANdleSetColorCommand(candle, Constants.CandleConstants.READY_TO_SHOOT_COLOR, Constants.CandleConstants.FAST_STROBE_HZ),
-                new ShooterContinuousCommand(shooter),
-                new IndexToShooterCommand(index),
-                new IntakeForwardCommand(intake)
-            )
+                new IndexToShooterCommand(index))
         );
 
         // repeatedly move index forward & reverse 
         // can't unjam while fire button is being pressed
-        unJamActive.and(fireButton().negate()).whileTrue(
+        unJamActive.and(fireButton().negate()).and(isShootingTrigger()).whileTrue(
             Commands.parallel(new IndexReverseCommand(index),
             new IntakeReverseCommand(intake)));
             
@@ -494,6 +490,13 @@ public class RobotContainer {
             .withPosition(2, 0)
             .withSize(2, 1)
             .getEntry();
+        
+        robotDriveEntry = robotStateTab
+            .add("Drive State", "unknown")
+            .withWidget(BuiltInWidgets.kTextView)
+            .withPosition(3, 0)
+            .withSize(2, 1)
+            .getEntry();
 
         // Display robot coordinates - currently only Swerve odometry
         robotPoseEntry = robotStateTab
@@ -523,15 +526,15 @@ public class RobotContainer {
 
         // register individual motors in ShuffleboardControl. See comments there for registration
 
-        ShuffleboardControl.registerOpenLoopMotor("Intake Roller", new MotorAccessor() {
-            @Override public void setPower(double p) { intake.setPower(p); }
-            @Override public double getPower() { return intake.getPower(); }
-            @Override public void setSpeed(double rpm) {}
-            @Override public double getSpeedRpm() { return 0.0; }
-            @Override public void setPositionDegrees(double d) {}
-            @Override public double getPositionDegrees() { return 0.0; }
-            @Override public void applyPid(double kp, double ki, double kd, double kv, double kg, double mmv, double mma) {}
-        });
+        // ShuffleboardControl.registerOpenLoopMotor("Intake Roller", new MotorAccessor() {
+        //     @Override public void setPower(double p) { intake.setPower(p); }
+        //     @Override public double getPower() { return intake.getPower(); }
+        //     @Override public void setSpeed(double rpm) {}
+        //     @Override public double getSpeedRpm() { return 0.0; }
+        //     @Override public void setPositionDegrees(double d) {}
+        //     @Override public double getPositionDegrees() { return 0.0; }
+        //     @Override public void applyPid(double kp, double ki, double kd, double kv, double kg, double mmv, double mma) {}
+        // });
 
         // ShuffleboardControl.registerVelocityMotor("Shooter", new MotorAccessor() {
         //     @Override public void setSpeed(double rpm) { shooter.setSpeed(rpm); }
@@ -553,35 +556,35 @@ public class RobotContainer {
         //     @Override public void applyPid(double kp, double ki, double kd, double kv, double kg, double mmv, double mma) { intakeExtender.applyPid(kp, ki, kd, kv, kg, mmv, mma); }
         // });
 
-        ShuffleboardControl.registerPositionMotor("Hood", new MotorAccessor() {
-            @Override public void setPositionDegrees(double deg) { hood.setPositionDegrees(deg); }
-            @Override public double getPositionDegrees() { return hood.getPositionDegrees(); }
-            @Override public void setPower(double p) {}
-            @Override public double getPower() { return 0.0; }
-            @Override public void setSpeed(double rpm) {}
-            @Override public double getSpeedRpm() { return 0.0; }
-            @Override public void applyPid(double kp, double ki, double kd, double kv, double kg, double mmv, double mma) { hood.applyPid(kp, ki, kd, kv, kg, mmv, mma); }
-        });
+        // ShuffleboardControl.registerPositionMotor("Hood", new MotorAccessor() {
+        //     @Override public void setPositionDegrees(double deg) { hood.setPositionDegrees(deg); }
+        //     @Override public double getPositionDegrees() { return hood.getPositionDegrees(); }
+        //     @Override public void setPower(double p) {}
+        //     @Override public double getPower() { return 0.0; }
+        //     @Override public void setSpeed(double rpm) {}
+        //     @Override public double getSpeedRpm() { return 0.0; }
+        //     @Override public void applyPid(double kp, double ki, double kd, double kv, double kg, double mmv, double mma) { hood.applyPid(kp, ki, kd, kv, kg, mmv, mma); }
+        // });
 
-        ShuffleboardControl.registerPositionMotor("Turret", new MotorAccessor() {
-            @Override public void setPositionDegrees(double deg) { turret.setPositionDegrees(deg); }
-            @Override public double getPositionDegrees() { return turret.getPositionDegrees(); }
-            @Override public void setPower(double p) {}
-            @Override public double getPower() { return 0.0; }
-            @Override public void setSpeed(double rpm) {}
-            @Override public double getSpeedRpm() { return 0.0; }
-            @Override public void applyPid(double kp, double ki, double kd, double kv, double kg, double mmv, double mma) { turret.applyPid(kp, ki, kd, kv, kg, mmv, mma); }
-        });
+        // ShuffleboardControl.registerPositionMotor("Turret", new MotorAccessor() {
+        //     @Override public void setPositionDegrees(double deg) { turret.setPositionDegrees(deg); }
+        //     @Override public double getPositionDegrees() { return turret.getPositionDegrees(); }
+        //     @Override public void setPower(double p) {}
+        //     @Override public double getPower() { return 0.0; }
+        //     @Override public void setSpeed(double rpm) {}
+        //     @Override public double getSpeedRpm() { return 0.0; }
+        //     @Override public void applyPid(double kp, double ki, double kd, double kv, double kg, double mmv, double mma) { turret.applyPid(kp, ki, kd, kv, kg, mmv, mma); }
+        // });
 
-        ShuffleboardControl.registerOpenLoopMotor("Arm", new MotorAccessor() {
-            @Override public void setSpeed(double rpm) {  }
-            @Override public double getSpeedRpm() { return 0.0; }
-            @Override public void setPower(double p) { climber.setArmPower(p); }
-            @Override public double getPower() { return climber.getPower(); }
-            @Override public void setPositionDegrees(double d) { }
-            @Override public double getPositionDegrees() { return climber.getArmPosition(); }
-            @Override public void applyPid(double kp, double ki, double kd, double kv, double kg, double mmv, double mma) { }
-        });
+        // ShuffleboardControl.registerOpenLoopMotor("Arm", new MotorAccessor() {
+        //     @Override public void setSpeed(double rpm) {  }
+        //     @Override public double getSpeedRpm() { return 0.0; }
+        //     @Override public void setPower(double p) { climber.setArmPower(p); }
+        //     @Override public double getPower() { return climber.getPower(); }
+        //     @Override public void setPositionDegrees(double d) { }
+        //     @Override public double getPositionDegrees() { return climber.getArmPosition(); }
+        //     @Override public void applyPid(double kp, double ki, double kd, double kv, double kg, double mmv, double mma) { }
+        // });
     }
 
     public Command getAutonomousCommand() {
@@ -665,6 +668,9 @@ public class RobotContainer {
         // update Shuffleboard while we're here
         if(robotFieldEntry != null) {
             robotFieldEntry.setString(FieldConstants.toString(currentRegion));
+        }
+        if(robotDriveEntry != null) {
+            robotDriveEntry.setString(isRobotRelative ? "Robot" : "Field");
         }
         if(robotPoseEntry != null) {
             robotPoseEntry.setString(getPoseString());

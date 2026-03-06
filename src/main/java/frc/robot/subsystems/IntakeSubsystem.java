@@ -36,9 +36,17 @@ public class IntakeSubsystem extends SubsystemBase {
           /* one-time action goes here */
         });
   }
+ boolean armed = false;
  
   public void setPower(double powerPercent){
+    if (powerPercent > 0)
+      armed = true;
+
+    // if (powerPercent == 0 && armed){
+    //   int x = 1/ (1-1);
+    // }
     intakeMotor1.setControl(new DutyCycleOut(powerPercent));
+    System.out.println("Setting power: " + powerPercent);
   }
 
   public double getPower(){
