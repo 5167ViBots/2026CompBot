@@ -225,10 +225,8 @@ public class RobotContainer {
         // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() -> {
 
-                double AllianceFactor = DriverStation.getAlliance().orElse(Alliance.Red) == Alliance.Red ? 1.0 : -1.0 ;
-
-                double leftY = joystick.getLeftY() * AllianceFactor;
-                double leftX = -joystick.getLeftX() * AllianceFactor;
+                double leftY = joystick.getLeftY();
+                double leftX = -joystick.getLeftX();
                 double rightX = -joystick.getRightX();
 
                 double deadband = 0.12;                             // added a deadband because my joysticks do not default to 0/0/0
@@ -728,10 +726,6 @@ public class RobotContainer {
         }
 
         System.out.println("No valid Limelight pose after 3 attempts, using fallback");
-        if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
-            drivetrain.resetPose(FieldConstants.RED_LEFT_TRENCH_START);
-        } else {            // either no alliance station or Blue allince
-            drivetrain.resetPose(FieldConstants.BLUE_LEFT_TRENCH_START);
-        }
+        drivetrain.resetPose(FieldConstants.BLUE_LEFT_TRENCH_START);
     }
 }

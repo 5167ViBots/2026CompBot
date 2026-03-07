@@ -56,34 +56,39 @@ public class DynamicAimCommand extends Command {
     }
 
     private Translation2d getTargetPosition() {
-        Alliance alliance = DriverStation.getAlliance().orElse(Alliance.Blue);
+        // Alliance alliance = DriverStation.getAlliance().orElse(Alliance.Blue);
 
         FieldConstants.FieldRegion region = robotContainer.getFieldLocation();
 
-        boolean isBlue = alliance == Alliance.Blue;
 
-        if (isBlue) {
+        // removed alliance-specific targetting
+
+        // boolean isBlue = alliance == Alliance.Blue;
+
+        // if (isBlue) {
             if ((region == FieldRegion.BLUE_DEEP_LEFT)
                 || (region == FieldRegion.BLUE_FRONT_LEFT)
                 || (region == FieldRegion.BLUE_DEEP_RIGHT)
-                || (region == FieldRegion.BLUE_FRONT_RIGHT)
-                || (region == FieldRegion.BLUE_LEFT_BUMP)
-                || (region == FieldRegion.BLUE_LEFT_TRENCH))
-                    return FieldConstants.BLUE_HUB_TARGET;
-            else if (region == FieldRegion.NEUTRAL_LEFT) return FieldConstants.BLUE_LEFT_TARGET;
+                || (region == FieldRegion.BLUE_FRONT_RIGHT))
+                return FieldConstants.BLUE_HUB_TARGET;
+            else if ((region == FieldRegion.NEUTRAL_LEFT)
+                || (region == FieldRegion.BLUE_LEFT_TRENCH)
+                || (region == FieldRegion.BLUE_LEFT_BUMP))
+                return FieldConstants.BLUE_LEFT_TARGET;
             else return FieldConstants.BLUE_RIGHT_TARGET;
-        }
-        else{
-            if ((region == FieldRegion.RED_DEEP_LEFT)
-                || (region == FieldRegion.RED_FRONT_LEFT)
-                || (region == FieldRegion.RED_DEEP_RIGHT)
-                || (region == FieldRegion.RED_FRONT_RIGHT)
-                || (region == FieldRegion.RED_LEFT_BUMP)
-                || (region == FieldRegion.RED_LEFT_TRENCH))
-                    return FieldConstants.RED_HUB_TARGET;
-            else if (region == FieldRegion.NEUTRAL_LEFT) return FieldConstants.RED_LEFT_TARGET;
-            else return FieldConstants.RED_RIGHT_TARGET;
-        }
+
+        // }
+        // else{
+        //     if ((region == FieldRegion.RED_DEEP_LEFT)
+        //         || (region == FieldRegion.RED_FRONT_LEFT)
+        //         || (region == FieldRegion.RED_DEEP_RIGHT)
+        //         || (region == FieldRegion.RED_FRONT_RIGHT)
+        //         || (region == FieldRegion.RED_LEFT_BUMP)
+        //         || (region == FieldRegion.RED_LEFT_TRENCH))
+        //             return FieldConstants.RED_HUB_TARGET;
+        //     else if (region == FieldRegion.NEUTRAL_LEFT) return FieldConstants.RED_LEFT_TARGET;
+        //     else return FieldConstants.RED_RIGHT_TARGET;
+        // }
     }
 
     @Override
