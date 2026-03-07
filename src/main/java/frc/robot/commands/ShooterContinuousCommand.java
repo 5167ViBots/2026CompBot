@@ -4,48 +4,38 @@
 
 package frc.robot.commands;
 
-import frc.robot.subsystems.LightSubsystem;
-import edu.wpi.first.wpilibj.util.Color;
+import frc.robot.subsystems.ShooterSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /** An example command that uses an example subsystem. */
-public class LightCommand extends Command {
+public class ShooterContinuousCommand  extends Command {
   @SuppressWarnings("PMD.UnusedPrivateField")
-  private final LightSubsystem m_subsystem;
-  private final Color InColor;
+  private final ShooterSubsystem m_subsystem;
 
   /**
    * Creates a new ExampleCommand.
    *
    * @param subsystem The subsystem used by this command.
    */
-  public LightCommand(LightSubsystem subsystem, Color Incolor) {
+  public ShooterContinuousCommand(ShooterSubsystem subsystem) {
     m_subsystem = subsystem;
-    InColor = Incolor;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(subsystem);
   }
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {
-    m_subsystem.resetTimer();
-    m_subsystem.startTimer();
-    m_subsystem.setColor(InColor);
-  }
+  public void initialize() {    m_subsystem.shoot();}
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-  }
 
-  
+  }
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {
-    // m_subsystem.setColor(Color.kAliceBlue);
-  }
+  public void end(boolean interrupted) {}
 
   // Returns true when the command should end.
   @Override

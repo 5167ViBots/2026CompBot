@@ -3,53 +3,44 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.subsystems;
+import frc.robot.Constants;
+import frc.robot.ShuffleboardControl;
+import frc.robot.ShuffleboardControl.MotorAccessor;
+
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
-// import com.ctre.phoenix.motorcontrol.ControlMode;
-// import com.ctre.phoenix.motorcontrol.NeutralMode;
-// import com.ctre.phoenix.motorcontrol.VictorSPXControlMode;
-// import com.ctre.phoenix.motorcontrol.can.TalonSRX;
-// import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
-import com.ctre.phoenix6.signals.NeutralModeValue;
-//import com.revrobotics.Rev2mDistanceSensor;
 
-//Caleb
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.ShooterSubsystemConstants;
 
 public class ShooterSubsystem extends SubsystemBase {
-  private TalonFX shooter1;
- // private Rev2mDistanceSensor distanceSensor;
-  /** Creates a new ExampletuneSubsystem. */
-  public ShooterSubsystem() {
-    shooter1 = new TalonFX(ShooterSubsystemConstants.ShooterMotor1ID, ShooterSubsystemConstants.ShooterMotor1CAN);
-    // shooter2 = new TalonFX(ShooterSubsystemConstants.ShooterMotor2ID, ShooterSubsystemConstants.ShooterMotor2CAN);
-    shooter1.setNeutralMode(NeutralModeValue.Brake);
-    // shooter2.setNeutralMode(NeutralModeValue.Brake);
-    // shooter2.setControl(new Follower(shooter1.getDeviceID(), MotorAlignmentValue.Opposed));
-   // distanceSensor = null;// new Rev2mDistanceSensor(ShooterSubsystemConstants.distanceSensorPort);
+  /** Creates a new ShooterSubsystem. */
+private TalonFX shooterMotor1;
+private TalonFX shooterMotor2;
 
-   var slot0Configs = new Slot0Configs();
-slot0Configs.kP = ShooterSubsystemConstants.kP; // An error of 1 rotation results in 2.4 V output
-slot0Configs.kI = ShooterSubsystemConstants.kI; // no output for integrated error
-slot0Configs.kD = ShooterSubsystemConstants.kD; // A velocity of 1 rps results in 0.1 V output
+public ShooterSubsystem() {
 
-shooter1.getConfigurator().apply(slot0Configs);
+    shooterMotor1 = new TalonFX(Constants.ShooterConstants.shooterMotor1ID, Constants.ShooterConstants.shootermotor1CANBus);
+    // shooterMotor2 = new TalonFX(Constants.ShooterConstants.shootermotor2ID, Constants.ShooterConstants.shootermotor2CANBus);
+    // var slot0Configs = new Slot0Configs();
+    // slot0Configs.kS = Constants.ShooterConstants.kS;
+    // slot0Configs.kV = Constants.ShooterConstants.kV;
+    // slot0Configs.kP = Constants.ShooterConstants.kP;
+    // slot0Configs.kI = Constants.ShooterConstants.kI;
+    // slot0Configs.kD = Constants.ShooterConstants.kD;
+    
+    // shooterMotor1.getConfigurator().apply(slot0Configs);
+
+    // shooterMotor2.setControl(new Follower(shooterMotor1.getDeviceID(),
+    //   Constants.ShooterConstants.INVERT_FOLLOWER
+    //     ? MotorAlignmentValue.Opposed
+    //     : MotorAlignmentValue.Aligned));
   }
-public void setspeed(double speed) {
-  // create a velocity closed-loop request, voltage output, slot 0 configs
-final VelocityVoltage m_request = new VelocityVoltage(0).withSlot(0);
-
-// set velocity to 8 rps, add 0.5 V to overcome gravity
-shooter1.setControl(m_request.withVelocity(speed).withFeedForward(0.5));
-   
-
-}
-
 
   /**
    * Example command factory method.
@@ -65,34 +56,27 @@ shooter1.setControl(m_request.withVelocity(speed).withFeedForward(0.5));
         });
   }
 
-  public void shootForward(){
+  public void shoot(){
 
-    setspeed(ShooterSubsystemConstants.shooterspeed);
-    }
-
-  public void shootBack(){
-    setspeed(-ShooterSubsystemConstants.shooterspeed);
+    shooterMotor1.setControl(new DutyCycleOut(0.5));
+    // setSpeed(Constants.ShooterConstants.SHOOTER_SPEED);
 
   }
 
-  public void warmUp(){
-    shooter1.set(1);
-    // shooter2.set(1);
+  // public double getSpeed(){
+  //   return shooterMotor1.getVelocity().getValueAsDouble();
+  // }
+
+  // public void setSpeed(double speed)
+  // {
+  //   final VelocityVoltage request = new VelocityVoltage(0).withSlot(0);
+
+  //   shooterMotor1.setControl(request.withVelocity(speed).withFeedForward(speed));
+  // }
+
+  public void stop(){
+    shooterMotor1.setControl(new DutyCycleOut(0));
   }
-
-  public void warmDown(){
-
-  }
-
-  public void shootStop(){
-
-  setspeed(0);
-  }
-
-  public void getPosition(){
-  }
-
-
 
   /**
    * An example method querying a boolean state of the subsystem (for example, a digital sensor).
@@ -106,6 +90,7 @@ shooter1.setControl(m_request.withVelocity(speed).withFeedForward(0.5));
 
   @Override
   public void periodic() {
+    // shoot();
     // This method will be called once per scheduler run
   }
 
@@ -114,4 +99,10 @@ shooter1.setControl(m_request.withVelocity(speed).withFeedForward(0.5));
     // This method will be called once per scheduler run during simulation
   }
 
+  public void applyPid(double kp, double ki, double kd, double kv, double kg, double mmv, double mma) {
+      Slot0Configs slot0 = new Slot0Configs().withKP(kp).withKI(ki).withKD(kd);
+      TalonFXConfiguration config = new TalonFXConfiguration();
+      config.Slot0 = slot0;
+      shooterMotor1.getConfigurator().apply(config);
+  }
 }

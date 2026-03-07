@@ -4,21 +4,20 @@
 
 package frc.robot.commands;
 
-import frc.robot.subsystems.ClimberSubsystem;
-import frc.robot.subsystems.ClimberSubsystem;
+import frc.robot.subsystems.ClimbSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /** An example command that uses an example subsystem. */
-public class ClimberDownCommand extends Command {
+public class ClimberArmDownCommand extends Command {
   @SuppressWarnings("PMD.UnusedPrivateField")
-  private final ClimberSubsystem m_subsystem;
+  private final ClimbSubsystem m_subsystem;
 
   /**
    * Creates a new ExampleCommand.
    *
    * @param subsystem The subsystem used by this command.
    */
-  public ClimberDownCommand(ClimberSubsystem subsystem) {
+  public ClimberArmDownCommand(ClimbSubsystem subsystem) {
     m_subsystem = subsystem;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(subsystem);
@@ -26,18 +25,20 @@ public class ClimberDownCommand extends Command {
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_subsystem.ClimberDown();
+        m_subsystem.lowerArm();
+
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_subsystem.ClimberStop();
+    m_subsystem.stopArm();
   }
 
   // Returns true when the command should end.
@@ -45,4 +46,5 @@ public class ClimberDownCommand extends Command {
   public boolean isFinished() {
     return false;
   }
+
 }

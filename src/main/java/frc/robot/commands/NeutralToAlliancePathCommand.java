@@ -4,17 +4,20 @@
 
 package frc.robot.commands;
 
-import frc.robot.subsystems.ArrowAutoSubsystem;
+import frc.robot.subsystems.ExampleSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants.arrowConstants;
 
-public class ChangeArrowAngleCommand extends Command {
+/** An example command that uses an example subsystem. */
+public class NeutralToAlliancePathCommand extends Command {
   @SuppressWarnings("PMD.UnusedPrivateField")
-  private final ArrowAutoSubsystem m_subsystem;
-  private final boolean direction;
+  private final ExampleSubsystem m_subsystem;
 
-  public ChangeArrowAngleCommand(ArrowAutoSubsystem subsystem, boolean forward) {
-    direction = forward;
+  /**
+   * Creates a new NeutralToAlliancePathCommand.
+   *
+   * @param subsystem The subsystem used by this command.
+   */
+  public NeutralToAlliancePathCommand(ExampleSubsystem subsystem) {
     m_subsystem = subsystem;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(subsystem);
@@ -26,9 +29,7 @@ public class ChangeArrowAngleCommand extends Command {
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {
-   m_subsystem.changeAngle(direction ? arrowConstants.arrrowManualSpeed:-arrowConstants.arrrowManualSpeed);
-  }
+  public void execute() {}
 
   // Called once the command ends or is interrupted.
   @Override

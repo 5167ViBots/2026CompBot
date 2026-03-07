@@ -6,98 +6,172 @@ package frc.robot;
 
 import com.ctre.phoenix6.HootAutoReplay;
 
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.commands.TurretHomeCommand;
+
+import frc.robot.Constants;
+import frc.robot.FieldConstants.FieldRegion;
 
 public class Robot extends TimedRobot {
-  private Command m_autonomousCommand;
+    private Command m_autonomousCommand;
 
-  private final RobotContainer m_robotContainer;
-
-          private final boolean kUseLimelight = false;
+    private final RobotContainer m_robotContainer;
 
     /* log and replay timestamp and joystick data */
     private final HootAutoReplay m_timeAndJoystickReplay = new HootAutoReplay()
         .withTimestampReplay()
         .withJoystickReplay();
 
-  public Robot() {
-    m_robotContainer = new RobotContainer();
-  }
+    public Robot() {
+        m_robotContainer = new RobotContainer();
 
-  @Override
-  public void robotPeriodic() {
-    m_timeAndJoystickReplay.update();
-    CommandScheduler.getInstance().run();
+        // Update field & pose every 20 ms, offset 5 ms.
+        addPeriodic(m_robotContainer::updateFieldAndPoseDisplay, 0.020, 0.005);
+        
+        // Check limelight every 100 ms, offset 10 ms.
+        addPeriodic(m_robotContainer.getLimelight()::periodic, 0.100, 0.10);
 
-        /*
-         * This example of adding Limelight is very simple and may not be sufficient for on-field use.
-         * Users typically need to provide a standard deviation that scales with the distance to target
-         * and changes with number of tags available.
-         *
-         * This example is sufficient to show that vision integration is possible, though exact implementation
-         * of how to use vision should be tuned per-robot and to the team's specification.
-         */
-        if (kUseLimelight) {
-            var driveState = m_robotContainer.drivetrain.getState();
-            double headingDeg = driveState.Pose.getRotation().getDegrees();
-            double omegaRps = Units.radiansToRotations(driveState.Speeds.omegaRadiansPerSecond);
+        // update swerve odometry with Limelight vision every 100 ms, offset 35 ms.
+        addPeriodic(m_robotContainer::updatePoseWithVision, 0.100, 0.035);
+    }
 
-            LimelightHelpers.SetRobotOrientation("limelight-doug", headingDeg, 0, 0, 0, 0, 0);
-            var llMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-doug");
-            if (llMeasurement != null && llMeasurement.tagCount > 0 && Math.abs(omegaRps) < 2.0) {
-                m_robotContainer.drivetrain.addVisionMeasurement(llMeasurement.pose, llMeasurement.timestampSeconds);
-            }
+    @Override
+    public void robotPeriodic() {
+        m_timeAndJoystickReplay.update();
+        CommandScheduler.getInstance().run(); 
+    }
+
+    @Override
+    public void disabledInit() {}
+
+    @Override
+    public void disabledPeriodic() {}
+
+    @Override
+    public void disabledExit() {}
+
+    @Override
+    public void autonomousInit() {
+        m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+
+        if (m_autonomousCommand != null) {
+            CommandScheduler.getInstance().schedule(m_autonomousCommand);
         }
-  }
-
-  @Override
-  public void disabledInit() {}
-
-  @Override
-  public void disabledPeriodic() {}
-
-  @Override
-  public void disabledExit() {}
-
-  @Override
-  public void autonomousInit() {
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
-
-    if (m_autonomousCommand != null) {
-      CommandScheduler.getInstance().schedule(m_autonomousCommand);
     }
-  }
 
-  @Override
-  public void autonomousPeriodic() {}
-
-  @Override
-  public void autonomousExit() {}
-
-  @Override
-  public void teleopInit() {
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.cancel();
+    @Override
+    public void autonomousPeriodic() {
+        dynamicAim();
     }
-  }
 
-  @Override
-  public void teleopPeriodic() {}
+    public void dynamicAim() {
+        Pose2d robotPose = m_robotContainer.getPose();
+        ChassisSpeeds robotSpeeds = m_robotContainer.getRobotSpeeds();
 
-  @Override
-  public void teleopExit() {}
+        // Debug message
+        System.out.println("Pose X = "+ robotPose.getX() + " Y = " + robotPose.getY() + " T = " + robotPose.getRotation());
 
-  @Override
-  public void testInit() {
-    CommandScheduler.getInstance().cancelAll();
-  }
+        // Get the correct hub target based on current field region / alliance
+        Translation2d targetPos = getTargetPosition();
 
-  @Override
-  public void testPeriodic() {}
+        double target_height = ((targetPos == FieldConstants.RED_HUB_TARGET) || (targetPos == FieldConstants.BLUE_HUB_TARGET) ? Constants.ballisticConstants.HUB_HEIGHT : 0.0);
 
-  @Override
-  public void testExit() {}
+        BallisticCalculator.BallisticSolution solution = 
+            BallisticCalculator.getAngles(
+                robotPose,
+                targetPos,
+                robotSpeeds,
+                target_height
+            );
+
+        m_robotContainer.turret.setPositionDegrees(solution.turretAngleDegrees);
+        m_robotContainer.hood.setPositionDegrees(solution.hoodAngleDegrees);
+    }
+
+    private Translation2d getTargetPosition() {
+        // Alliance alliance = DriverStation.getAlliance().orElse(Alliance.Blue);
+
+        FieldConstants.FieldRegion region = m_robotContainer.getFieldLocation();
+
+
+        // removed alliance-specific targetting
+
+        // boolean isBlue = alliance == Alliance.Blue;
+
+        // if (isBlue) {
+            if ((region == FieldRegion.BLUE_DEEP_LEFT)
+                || (region == FieldRegion.BLUE_FRONT_LEFT)
+                || (region == FieldRegion.BLUE_DEEP_RIGHT)
+                || (region == FieldRegion.BLUE_FRONT_RIGHT))
+                return FieldConstants.BLUE_HUB_TARGET;
+            else if ((region == FieldRegion.NEUTRAL_LEFT)
+                || (region == FieldRegion.BLUE_LEFT_TRENCH)
+                || (region == FieldRegion.BLUE_LEFT_BUMP))
+                return FieldConstants.BLUE_LEFT_TARGET;
+            else return FieldConstants.BLUE_RIGHT_TARGET;
+
+        // }
+        // else{
+        //     if ((region == FieldRegion.RED_DEEP_LEFT)
+        //         || (region == FieldRegion.RED_FRONT_LEFT)
+        //         || (region == FieldRegion.RED_DEEP_RIGHT)
+        //         || (region == FieldRegion.RED_FRONT_RIGHT)
+        //         || (region == FieldRegion.RED_LEFT_BUMP)
+        //         || (region == FieldRegion.RED_LEFT_TRENCH))
+        //             return FieldConstants.RED_HUB_TARGET;
+        //     else if (region == FieldRegion.NEUTRAL_LEFT) return FieldConstants.RED_LEFT_TARGET;
+        //     else return FieldConstants.RED_RIGHT_TARGET;
+        // }
+    }
+
+    
+
+    @Override
+    public void autonomousExit() {}
+
+    @Override
+    public void teleopInit() {
+        if (m_autonomousCommand != null) {
+            CommandScheduler.getInstance().cancel(m_autonomousCommand);
+        }
+        
+        // only initialize from limelight if "Initialization" constant is true (change in Constants.java)
+        // We will likely move this to AutonomousInit when we're confident that everything works well.
+        if (Constants.ENABLE_LIMELIGHT_INITIALIZATION) { 
+            m_robotContainer.resetPoseFromLimelight();
+        }
+
+        if (Constants.ENABLE_TURRET_HOMING){                                // only initialize turret if HOMING is true. (change in Constants.java)
+            CommandScheduler.getInstance().schedule(                        // eventually move this to AutonomousInit when we're done testing.
+                new TurretHomeCommand(m_robotContainer.getTurret())
+            );
+        }
+    }
+
+    @Override
+    public void teleopPeriodic() {
+        // ShuffleboardControl.update();
+    }
+
+    @Override
+    public void teleopExit() {}
+
+    @Override
+    public void testInit() {
+        CommandScheduler.getInstance().cancelAll();
+    }
+
+    @Override
+    public void testPeriodic() {}
+
+    @Override
+    public void testExit() {}
+
+    @Override
+    public void simulationPeriodic() {}
 }

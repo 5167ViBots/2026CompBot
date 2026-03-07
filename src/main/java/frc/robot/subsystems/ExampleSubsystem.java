@@ -1,48 +1,21 @@
-
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.subsystems;
+import frc.robot.Constants;
 
 import com.ctre.phoenix6.controls.DutyCycleOut;
-import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.MotorAlignmentValue;
+
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class ClimberSubsystem extends SubsystemBase {
-
-  TalonFX Climber1;
-  TalonFX Climber2;
+public class ExampleSubsystem extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
-  public ClimberSubsystem() {
-   Climber1 = new TalonFX(0);
-   Climber2 = new TalonFX(1);
+  public ExampleSubsystem() {}
 
-  //  Climber2.getConfigurator();
-
-  //  var Config = new MotorOutputConfigs();
-
-  //  Config.Inverted = InvertedValue.Clockwise_Positive;
-   
-  //  Climber2.getConfigurator().apply(Config);//0setInverted(true);
-
-   Climber2.setControl(new Follower(Climber1.getDeviceID(),MotorAlignmentValue.Opposed));
-   
-  } 
-
-  
-  public void ClimberUp() {
-    Climber1.setControl(new DutyCycleOut (.4));
-  }
-
-  public void ClimberStop() {
-    Climber1.setControl(new DutyCycleOut (0));
-  }
-
-  public void ClimberDown() {
-    Climber1.setControl(new DutyCycleOut (-.4));
-  }
   /**
    * Example command factory method.
    *
