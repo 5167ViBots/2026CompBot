@@ -6,12 +6,16 @@ package frc.robot;
 
 import com.ctre.phoenix6.HootAutoReplay;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.commands.TurretHomeCommand;
 
 import frc.robot.Constants;
+import frc.robot.FieldConstants.FieldRegion;
 
 public class Robot extends TimedRobot {
     private Command m_autonomousCommand;
@@ -25,9 +29,6 @@ public class Robot extends TimedRobot {
 
     public Robot() {
         m_robotContainer = new RobotContainer();
-
-        // Update Shuffleboard every 100 ms, offset 5 ms
-        addPeriodic(ShuffleboardControl::update, 0.020, 0.005);
 
         // Update field & pose every 20 ms, offset 5 ms.
         addPeriodic(m_robotContainer::updateFieldAndPoseDisplay, 0.020, 0.005);
@@ -64,7 +65,71 @@ public class Robot extends TimedRobot {
     }
 
     @Override
-    public void autonomousPeriodic() {}
+    public void autonomousPeriodic() {
+        dynamicAim();
+    }
+
+    public void dynamicAim() {
+        Pose2d robotPose = m_robotContainer.getPose();
+        ChassisSpeeds robotSpeeds = m_robotContainer.getRobotSpeeds();
+
+        // Debug message
+        System.out.println("Pose X = "+ robotPose.getX() + " Y = " + robotPose.getY() + " T = " + robotPose.getRotation());
+
+        // Get the correct hub target based on current field region / alliance
+        Translation2d targetPos = getTargetPosition();
+
+        double target_height = ((targetPos == FieldConstants.RED_HUB_TARGET) || (targetPos == FieldConstants.BLUE_HUB_TARGET) ? Constants.ballisticConstants.HUB_HEIGHT : 0.0);
+
+        BallisticCalculator.BallisticSolution solution = 
+            BallisticCalculator.getAngles(
+                robotPose,
+                targetPos,
+                robotSpeeds,
+                target_height
+            );
+
+        m_robotContainer.turret.setPositionDegrees(solution.turretAngleDegrees);
+        m_robotContainer.hood.setPositionDegrees(solution.hoodAngleDegrees);
+    }
+
+    private Translation2d getTargetPosition() {
+        // Alliance alliance = DriverStation.getAlliance().orElse(Alliance.Blue);
+
+        FieldConstants.FieldRegion region = m_robotContainer.getFieldLocation();
+
+
+        // removed alliance-specific targetting
+
+        // boolean isBlue = alliance == Alliance.Blue;
+
+        // if (isBlue) {
+            if ((region == FieldRegion.BLUE_DEEP_LEFT)
+                || (region == FieldRegion.BLUE_FRONT_LEFT)
+                || (region == FieldRegion.BLUE_DEEP_RIGHT)
+                || (region == FieldRegion.BLUE_FRONT_RIGHT))
+                return FieldConstants.BLUE_HUB_TARGET;
+            else if ((region == FieldRegion.NEUTRAL_LEFT)
+                || (region == FieldRegion.BLUE_LEFT_TRENCH)
+                || (region == FieldRegion.BLUE_LEFT_BUMP))
+                return FieldConstants.BLUE_LEFT_TARGET;
+            else return FieldConstants.BLUE_RIGHT_TARGET;
+
+        // }
+        // else{
+        //     if ((region == FieldRegion.RED_DEEP_LEFT)
+        //         || (region == FieldRegion.RED_FRONT_LEFT)
+        //         || (region == FieldRegion.RED_DEEP_RIGHT)
+        //         || (region == FieldRegion.RED_FRONT_RIGHT)
+        //         || (region == FieldRegion.RED_LEFT_BUMP)
+        //         || (region == FieldRegion.RED_LEFT_TRENCH))
+        //             return FieldConstants.RED_HUB_TARGET;
+        //     else if (region == FieldRegion.NEUTRAL_LEFT) return FieldConstants.RED_LEFT_TARGET;
+        //     else return FieldConstants.RED_RIGHT_TARGET;
+        // }
+    }
+
+    
 
     @Override
     public void autonomousExit() {}

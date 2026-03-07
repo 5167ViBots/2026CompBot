@@ -10,6 +10,7 @@ import java.util.Map;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -41,6 +42,7 @@ import frc.robot.commands.IndexStopCommand;
 import frc.robot.commands.CANdleSetColorCommand;
 import frc.robot.commands.DynamicAimCommand;
 import frc.robot.commands.ClimberArmDownCommand;
+import frc.robot.commands.ClimberArmStopCommand;
 import frc.robot.commands.ClimberArmUpCommand;
 
 import frc.robot.generated.TunerConstants;
@@ -210,6 +212,8 @@ public class RobotContainer {
         configureBindings();
         configureDefaults();
         configureShuffleboard();
+        registerPathPlannerCommands();
+
 
             // Timer.delay(0.5);
             // ShuffleboardControl.update();
@@ -217,6 +221,21 @@ public class RobotContainer {
 
         // Default robot state. Temporarily moved from IDLE to FOM. Depending on operator preference we may want to set this differently.
     }
+
+     private void registerPathPlannerCommands() {
+         NamedCommands.registerCommand("Intake", new IntakeForwardCommand(intake));  
+         NamedCommands.registerCommand("IntakeStop", new IntakeStopCommand(intake)); 
+         NamedCommands.registerCommand("IntakeExtend", new IntakeExtenderDown(intakeExtender));  
+         NamedCommands.registerCommand("IntakeRetract", new IntakeExtenderUp(intakeExtender)); 
+         NamedCommands.registerCommand("Shoot", new ShooterContinuousCommand(shooter));  
+         NamedCommands.registerCommand("StopShooting", new ShooterStopCommand(shooter));
+         NamedCommands.registerCommand("Index", new IndexToShooterCommand(index));  
+         NamedCommands.registerCommand("IndexStop", new IndexStopCommand(index));   
+         NamedCommands.registerCommand("ClimbUp", new ClimberArmUpCommand(climber));  
+         NamedCommands.registerCommand("ClimbDown", new ClimberArmDownCommand(climber));
+         NamedCommands.registerCommand("ClimbStop", new ClimberArmStopCommand(climber));
+         
+        }
 
     // Set defaults for the various subsystems.
     private void configureDefaults() {
