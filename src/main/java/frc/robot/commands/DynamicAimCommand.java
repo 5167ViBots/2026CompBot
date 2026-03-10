@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.TurretSubsystem;
 import frc.robot.subsystems.HoodSubsystem;
+import frc.robot.subsystems.ShooterSubsystem;
 import edu.wpi.first.math.geometry.Translation2d;
 import frc.robot.BallisticCalculator;
 import frc.robot.Constants;
@@ -20,11 +21,13 @@ public class DynamicAimCommand extends Command {
 
     private final TurretSubsystem turret;
     private final HoodSubsystem hood;
+    private final ShooterSubsystem shooter;
     private final RobotContainer robotContainer;   // for pose, speeds, and field state
 
-    public DynamicAimCommand(TurretSubsystem turret, HoodSubsystem hood, RobotContainer robotContainer) {
+    public DynamicAimCommand(TurretSubsystem turret, HoodSubsystem hood, ShooterSubsystem shooter, RobotContainer robotContainer) {
         this.turret = turret;
         this.hood = hood;
+        this.shooter = shooter;
         this.robotContainer = robotContainer;
 
         addRequirements(turret, hood);   // important: prevents conflicts
@@ -34,9 +37,6 @@ public class DynamicAimCommand extends Command {
     public void execute() {
         Pose2d robotPose = robotContainer.getPose();
         ChassisSpeeds robotSpeeds = robotContainer.getRobotSpeeds();
-
-        // Debug message
-        System.out.println("Pose X = "+ robotPose.getX() + " Y = " + robotPose.getY() + " T = " + robotPose.getRotation());
 
         // Get the correct hub target based on current field region / alliance
         Translation2d targetPos = getTargetPosition();
@@ -53,6 +53,15 @@ public class DynamicAimCommand extends Command {
 
         turret.setPositionDegrees(solution.turretAngleDegrees);
         hood.setPositionDegrees(solution.hoodAngleDegrees);
+        if (Double.isNaN(solution.shooterSpeedMps))
+        {
+            shooter.setSpeedMPS(Constants.ShooterConstants.SHOOTER_SPEED);
+        }
+        else
+        {
+            shooter.setSpeedMPS(solution.shooterSpeedMps);
+        }
+
     }
 
     private Translation2d getTargetPosition() {

@@ -46,7 +46,7 @@ public class IntakeSubsystem extends SubsystemBase {
     //   int x = 1/ (1-1);
     // }
     intakeMotor1.setControl(new DutyCycleOut(powerPercent));
-    System.out.println("Setting power: " + powerPercent);
+    // System.out.println("Setting power: " + powerPercent);
   }
 
   public double getPower(){

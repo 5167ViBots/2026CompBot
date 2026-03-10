@@ -9,7 +9,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 public class LimelightSubsystem extends SubsystemBase {
 
@@ -42,8 +44,16 @@ public class LimelightSubsystem extends SubsystemBase {
         ty = table.getEntry("ty");
         ta = table.getEntry("ta");
         tid = table.getEntry("tid");
-//        botpose = table.getEntry("botpose_mt2");  // alliance-relative pose - using megatag2
-        botpose = table.getEntry("botpose_wpiblue"); // absolute coordinte pose
+
+        if (DriverStation.getAlliance().get() == Alliance.Blue)
+        {
+            botpose = table.getEntry("botpose_wpiblue"); // absolute coordinte pose
+        }
+        else {
+            botpose = table.getEntry("botpose_wpired");
+        }
+        // botpose = table.getEntry("botpose_mt2"); // relative coordinate pose
+
         // Optional: set pipeline / LED mode etc. on init
         // table.getEntry("pipeline").setNumber(0);  // AprilTag pipeline
         // table.getEntry("ledMode").setNumber(0);   // default

@@ -1,3 +1,4 @@
+
 package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -21,12 +22,73 @@ public final class BallisticCalculator {
             return new BallisticSolution(45.0, 0.0); // fallback for very close range
         }
 
+        double fixedHoodDeg = ballisticConstants.FIXED_HOOD_ANGLE;
+
+        double shooterSpeedMps = solveSpeedForFixedHood(distanceM, robotSpeeds, toTarget, targetHeightM, fixedHoodDeg);
+
+        // make sure we returned a value in an acceptable range
+        if((!Double.isNaN(shooterSpeedMps)) && (shooterSpeedMps > ballisticConstants.MIN_SHOOTER_SPEED) && (shooterSpeedMps < ballisticConstants.MAX_SHOOTER_SPEED))
+        {
+            double turretDeg = computeTurretAngle(robotPose, toTarget, robotSpeeds, fixedHoodDeg, shooterSpeedMps);
+            return new BallisticSolution(fixedHoodDeg, turretDeg, shooterSpeedMps);
+        }
+
+        // if we can't calculate a solution for SHOOTING SPEED, fall back to the previous solver (angle bisection) and use the previous fixed exit velocity
         double hoodAngle = solveHoodAngle(distanceM, robotSpeeds, toTarget, targetHeightM);
-
-        double turretDeg = computeTurretAngle(robotPose, toTarget, robotSpeeds, hoodAngle) + 180;
-
-        return new BallisticSolution(hoodAngle, turretDeg);
+        double turretDeg = computeTurretAngle(robotPose, toTarget, robotSpeeds, hoodAngle, ballisticConstants.SHOOTER_EXIT_VELOCITY);
+        return new BallisticSolution(hoodAngle, turretDeg, ballisticConstants.SHOOTER_EXIT_VELOCITY);
     }
+
+    private static double solveSpeedForFixedHood(
+        double distanceM,
+        ChassisSpeeds robotSpeeds,
+        Translation2d toTarget,
+        double targetHeightM,
+        double fixedHoodDeg)
+        {
+
+
+            double thetaRad = Math.toRadians(fixedHoodDeg); // Math.sin and Math.cos take Radians, so we convert DEG to RAD
+            double A = Math.cos(thetaRad); // cos(theta) and sin(theta) are constants with a fixed hood angle, so treat them as such.
+            double B = Math.sin(thetaRad);
+            double D = distanceM;
+            double dh = targetHeightM - ballisticConstants.SHOOTER_HEIGHT; // Might want to make this Math.min(0,height)
+
+            double robotAlong = robotNormalSpeedComponent(robotSpeeds, toTarget);
+
+            // Solving for shooter speed is a quadratic equation in the form "a * x^2 + b * x + c = y(x)"
+            // where a, b, and c are given by the values below
+            // Quadratic solution is of the form (-b +- sqrt(b^2 - 4ac))/2a
+            // rather than write all this out, we'll just create an a, b, and c and solve those
+            // The quadratic solution thus looks a lot less messy (and less likely for the author to make an error)
+
+            double a = dh * A * A - D * B * A;
+            double b = 2 * dh * A * robotAlong - D * B * robotAlong;
+
+            // changed to - 0.5Gravity. I think that's correct.
+
+            double c = dh * robotAlong * robotAlong - 0.5 * ballisticConstants.GRAVITY * D * D;
+
+            // discriminate is the part inside SQRT
+            double discriminate = b * b - 4 * a * c;
+
+            // if discriminate is negative, then there is only an imaginary solution, so return NaN (not a number)
+            if (discriminate < 0) { return Double.NaN; }
+
+            // we already have the disc to check we're not getting imaginary numbers, so let's simply things further
+            double sqrtDisc = Math.sqrt(discriminate);
+
+            // this is just the quadratic solution, but with easier labels
+            double v1 = (-b + sqrtDisc) / (2 * a);
+            double v2 = (-b - sqrtDisc) / (2 * a);
+
+            // fundamental theorem of algebra
+            if ((v2 > ballisticConstants.MIN_SHOOTER_SPEED) && (v2 < ballisticConstants.MAX_SHOOTER_SPEED)){ return v2; }
+            if ((v1 > ballisticConstants.MIN_SHOOTER_SPEED) && (v1 < ballisticConstants.MAX_SHOOTER_SPEED)){ return v1; }
+
+            // if there's no solution between MIN and MAX speed, return NaN
+            return Double.NaN;
+        }
 
     private static double solveHoodAngle(double distanceM, ChassisSpeeds robotSpeeds, Translation2d toTarget, double targetHeightM) {
 
@@ -130,9 +192,10 @@ public final class BallisticCalculator {
     }
 
     private static double computeTurretAngle(Pose2d robotPose, Translation2d toTarget,
-                                             ChassisSpeeds robotSpeeds, double hoodAngleDegrees) {
+                                             ChassisSpeeds robotSpeeds, double hoodAngleDegrees,
+                                             double shooterSpeed) {
         double thetaRad = Math.toRadians(hoodAngleDegrees);
-        double v0 = ballisticConstants.SHOOTER_EXIT_VELOCITY;
+        double v0 = shooterSpeed;
 
         double robotAlong = robotNormalSpeedComponent(robotSpeeds, toTarget);
         double vx = v0 * Math.cos(thetaRad) + robotAlong;
@@ -152,7 +215,7 @@ public final class BallisticCalculator {
         double launchFieldRad = Math.atan2(muzzleVy, muzzleVx);
 
         double turretRad = launchFieldRad - robotPose.getRotation().getRadians();
-        double turretDeg = ((Math.toDegrees(turretRad) + 180) % 360) - 180;
+        double turretDeg = -((Math.toDegrees(turretRad) + 180) % 360);
 
         return turretDeg;
     }
@@ -160,10 +223,18 @@ public final class BallisticCalculator {
     public static class BallisticSolution {
         public final double hoodAngleDegrees;
         public final double turretAngleDegrees;
+        public final double shooterSpeedMps;
 
         public BallisticSolution(double hoodAngleDegrees, double turretAngleDegrees) {
             this.hoodAngleDegrees = hoodAngleDegrees;
             this.turretAngleDegrees = turretAngleDegrees;
+            this.shooterSpeedMps = Double.NaN;
+        }
+
+        public BallisticSolution(double hoodAngleDegrees, double turretAngleDegrees, double shooterSpeedMps){
+            this.hoodAngleDegrees = hoodAngleDegrees;
+            this.turretAngleDegrees = turretAngleDegrees;
+            this.shooterSpeedMps = shooterSpeedMps;
         }
     }
 }

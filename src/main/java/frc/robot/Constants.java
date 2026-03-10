@@ -28,7 +28,7 @@ public final class Constants {
 
   public static class OperatorConstants {
 
-    public static final int kDriverControllerPort = 0;
+    public static final int kDriverControllerPort = 3;
 
     public static final int kButtonBoardPort = 1;
 
@@ -43,7 +43,7 @@ public final class Constants {
 
     public static final int CLIMB_RAISE_ARM_BUTTON = 8;
     public static final int CLIMB_LOWER_ARM_BUTTON = 9;
-    public static final int TOGGLE_DRIVE_MODE_BUTTON = 10;
+    // public static final int TOGGLE_DRIVE_MODE_BUTTON = 10;
     public static final int STATIC_AIM_BUTTON = 11;
   }
 
@@ -60,11 +60,11 @@ public final class Constants {
     public static final int shootermotor2ID = -1;
     public static final String shootermotor2CANBus = "rio";
 
-    public static final double SHOOTER_SPEED = 6.0;
+    public static final double SHOOTER_SPEED = 0.6;
 
-    public static final double kS = 0.2; // Static gain (volts)
-    public static final double kP = 0.1; // Proportional gain (volts per unit error)
-    public static final double kV = 0.1; // Velocity gain (volts per unit velocity)
+    public static final double kS = 0.0; // Static gain (volts)
+    public static final double kP = 0.07; // Proportional gain (volts per unit error)
+    public static final double kV = 0.0; // Velocity gain (volts per unit velocity)
     public static final double kI = 0.0; // Integral gain (volts per unit integral)
     public static final double kD = 0.0; // Derivative gain (volts per unit derivative)
 
@@ -212,6 +212,9 @@ public final class Constants {
     public static final double HUB_HEIGHT = Units.feetToMeters(6);              // height of hub center from floor
     public static final double SHOOTER_HEIGHT = Units.feetToMeters(2);          // height of shooter exit point from floor, needs to be measured
 
+    public static final double MIN_SHOOTER_SPEED = 5.0;  // ft/s. Used for limits in ballisticsCalculator.java
+    public static final double MAX_SHOOTER_SPEED = 40.0; // ft/s. Will convert in Shooter subsystem
+    public static final double FIXED_HOOD_ANGLE = 40.0; // degrees
     public static final int MAX_ATTEMPTS = 10; // max iterations for binary search in ballistic calculator
 
     public static final double HOOD_HEIGHT_ERROR_TOLERANCE = Units.feetToMeters(1); // height of tolerance for hood height solution in ballistic calculator

@@ -9,29 +9,64 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.TurretSubsystem;
 import frc.robot.subsystems.HoodSubsystem;
+import frc.robot.subsystems.ShooterSubsystem;
 import edu.wpi.first.math.geometry.Translation2d;
 import frc.robot.BallisticCalculator;
 import frc.robot.Constants;
 import frc.robot.FieldConstants;           // for hub positions
 import frc.robot.RobotContainer;          // to get current field region / pose
+import frc.robot.BallisticCalculator.BallisticSolution;
 import frc.robot.FieldConstants.FieldRegion;
 
 public class StaticAimCommand extends Command {
 
     private final TurretSubsystem turret;
     private final HoodSubsystem hood;
+    private final ShooterSubsystem shooter;
     private final RobotContainer robotContainer;   // for pose, speeds, and field state
 
-    public StaticAimCommand(TurretSubsystem turret, HoodSubsystem hood, RobotContainer robotContainer) {
+    private BallisticSolution solution;
+
+    public StaticAimCommand(TurretSubsystem turret, HoodSubsystem hood, ShooterSubsystem shooter, RobotContainer robotContainer) {
         this.turret = turret;
         this.hood = hood;
+        this.shooter = shooter;
         this.robotContainer = robotContainer;
 
-        addRequirements(turret, hood);   // important: prevents conflicts
+        solution = new BallisticSolution(0, 0, 0);
+
+        addRequirements(turret, hood, shooter);   // important: prevents conflicts
     }
 
+
+    // Run through the ballistics calculator once
+
+    @Override
+    public void initialize() {
+    }
+
+    // Set positions constantly
     @Override
     public void execute() {
+        calculateValues();
+
+        turret.setPositionDegrees(solution.turretAngleDegrees);
+        hood.setPositionDegrees(solution.hoodAngleDegrees);
+
+        if (Double.isNaN(solution.shooterSpeedMps))
+        {
+            shooter.setSpeedMPS(Constants.ShooterConstants.SHOOTER_SPEED);
+        }
+        else
+        {
+            shooter.setSpeedMPS(solution.shooterSpeedMps * 5);
+        }
+
+    }
+
+
+    public void calculateValues()
+    {
         Pose2d robotPose = robotContainer.getPose();
         ChassisSpeeds robotSpeeds = robotContainer.getRobotSpeeds();
 
@@ -45,7 +80,7 @@ public class StaticAimCommand extends Command {
         System.out.println("Target X = "+ targetPos.getX() + " Y = " + targetPos.getY());
         System.out.println("Target " + (targetPos == FieldConstants.BLUE_HUB_TARGET ? "Hub" : "Field"));
 
-        BallisticCalculator.BallisticSolution solution = 
+        solution = 
             BallisticCalculator.getAngles(
                 robotPose,
                 targetPos,
@@ -53,11 +88,11 @@ public class StaticAimCommand extends Command {
                 target_height
             );
 
-        turret.setPositionDegrees(solution.turretAngleDegrees);
-        hood.setPositionDegrees(solution.hoodAngleDegrees);
-        System.out.println("hood angle " + solution.hoodAngleDegrees + " turret Angle " + solution.turretAngleDegrees);
-    }
+        System.out.println("hood Solution: " + solution.hoodAngleDegrees);
+        System.out.println("TurretSolution: " + solution.turretAngleDegrees);
+        System.out.println("Shooter Solution: " + solution.shooterSpeedMps);
 
+    }
     private Translation2d getTargetPosition() {
         // Alliance alliance = DriverStation.getAlliance().orElse(Alliance.Blue);
 
@@ -78,6 +113,7 @@ public class StaticAimCommand extends Command {
 
     @Override
     public boolean isFinished() {
-        return turret.atTargetPosition(); // we're only running through this once, turret.setposition() should fix the turret angle
+        return false;
+        // return turret.atTargetPosition(); // we're only running through this once, turret.setposition() should fix the turret angle
     }
 }

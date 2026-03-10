@@ -117,7 +117,7 @@ public class RobotContainer {
 
         private final Telemetry logger = new Telemetry(MaxSpeed);
 
-        private final CommandPS5Controller joystick = new CommandPS5Controller(Constants.OperatorConstants.kDriverControllerPort);
+        private final CommandXboxController joystick = new CommandXboxController(Constants.OperatorConstants.kDriverControllerPort);
 
         private final CommandJoystick buttonBoard = new CommandJoystick(Constants.OperatorConstants.kButtonBoardPort);
         private final CommandJoystick buttonBoardJR = new CommandJoystick(2);
@@ -361,7 +361,7 @@ public class RobotContainer {
         //     point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
         // ));
 
-        // added a test command to aim turret with B button on xboxcontroller
+        // added a test command to aim turret with B buttojn on xboxcontroller
         // joystick.b().whileTrue(new DynamicAimCommand(turret, hood, this));
 
         // more default commands from Swerve.
@@ -394,6 +394,9 @@ public class RobotContainer {
         buttonBoardJR.button(4).whileTrue(new IndexVertical(index));
         buttonBoardJR.button(3).whileTrue(new IntakeExtenderDown(intakeExtender));
 
+        // temporary for testing because phoenixTuner is being stupid.
+        buttonBoard.button(10).whileTrue(new ShooterStartCommand(shooter));
+
         // isShooting pairs FOM and SAS
         // This trigger will activate when we first enter either the FIRE_ON_THE_MOVE or STOP_AND_SHOOT state, but not on subsequent scheduler runs while we're still in that state, due to the debounce.
 
@@ -408,7 +411,7 @@ public class RobotContainer {
             new IntakeExtenderUp(intakeExtender)
         );
 
-        buttonBoard.button(Constants.OperatorConstants.STATIC_AIM_BUTTON).onTrue(new StaticAimCommand(turret, hood, this));
+        buttonBoard.button(Constants.OperatorConstants.STATIC_AIM_BUTTON).whileTrue(new StaticAimCommand(turret, hood, shooter, this));
 
         climbTrigger().and(climbRaiseArmTrigger).whileTrue(new ClimberArmUpCommand(climber));
         climbTrigger().and(climbLowerArmTrigger).whileTrue(new ClimberArmDownCommand(climber));
@@ -437,7 +440,7 @@ public class RobotContainer {
             )
         );
 
-        fireOnMoveTrigger().whileTrue(new DynamicAimCommand(turret, hood, this));                                          // in "FOM" state we use dynamic aiming
+        fireOnMoveTrigger().whileTrue(new DynamicAimCommand(turret, hood, shooter, this));                                          // in "FOM" state we use dynamic aiming
 
         // for stop and shoot, if we're not unjamming or shooting, turn on the intake, turn off shooter & index.
         stopAndShootTrigger()
@@ -451,16 +454,27 @@ public class RobotContainer {
         );
 
         // for stop and shoot, if the fire button is being held, turn everything on
+
+        // temporarily changed 
+
+        // fireButton()
+        //     .and(isShootingTrigger())
+        //     .and(unJamActive.negate())
+        //     .whileTrue(
+        //     Commands.parallel(
+        //         // new CANdleSetColorCommand(candle, Constants.CandleConstants.READY_TO_SHOOT_COLOR, Constants.CandleConstants.FAST_STROBE_HZ),
+        //        // new IndexToShooterCommand(index))|
+        //      //  new IndexVertical(index))
+        //     new ShooterStartCommand(shooter))
+        // );
+ 
         fireButton()
-            .and(isShootingTrigger())
+            // .and(isShootingTrigger())
             .and(unJamActive.negate())
             .whileTrue(
             Commands.parallel(
                 // new CANdleSetColorCommand(candle, Constants.CandleConstants.READY_TO_SHOOT_COLOR, Constants.CandleConstants.FAST_STROBE_HZ),
-               // new IndexToShooterCommand(index))|
-             //  new IndexVertical(index))
-            new ShooterStartCommand(shooter))
-        );
+               new IndexToShooterCommand(index)));
 
         // repeatedly move index forward & reverse 
         // can't unjam while fire button is being pressed
@@ -497,7 +511,7 @@ public class RobotContainer {
                 new ShooterStopCommand(shooter),
                 new IndexStopCommand(index),
                 new IntakeStopCommand(intake),
-                drivetrain.applyRequest(() -> new SwerveRequest.Idle())
+                drivetrain.applyRequest(() -> new SwerveRequest.SwerveDriveBrake())
             )
         );
 
@@ -514,17 +528,16 @@ public class RobotContainer {
         calibrationTrigger().whileTrue(
             Commands.parallel(
                 new IntakeStopCommand(intake),
-                new IndexStopCommand(index),
-                new ShooterStopCommand(shooter)
+                new IndexStopCommand(index)
+                // new ShooterStopCommand(shooter)
             )
         );
 
         // toggle between fixed and relative drive:
-        joystick.square()
+        joystick.x()
             .onTrue(Commands.runOnce(() -> {
                 isRobotRelative = !isRobotRelative;
             }));
-
     }
 
     // separate function for the sophisticated shuffleboard control so we can comment them out for competition (we don't want to be able to adjust PID once they're set)

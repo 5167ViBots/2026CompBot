@@ -11,6 +11,7 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
@@ -27,14 +28,14 @@ public ShooterSubsystem() {
 
     shooterMotor1 = new TalonFX(Constants.ShooterConstants.shooterMotor1ID, Constants.ShooterConstants.shootermotor1CANBus);
     // shooterMotor2 = new TalonFX(Constants.ShooterConstants.shootermotor2ID, Constants.ShooterConstants.shootermotor2CANBus);
-    // var slot0Configs = new Slot0Configs();
+    var slot0Configs = new Slot0Configs();
     // slot0Configs.kS = Constants.ShooterConstants.kS;
     // slot0Configs.kV = Constants.ShooterConstants.kV;
-    // slot0Configs.kP = Constants.ShooterConstants.kP;
-    // slot0Configs.kI = Constants.ShooterConstants.kI;
-    // slot0Configs.kD = Constants.ShooterConstants.kD;
-    
-    // shooterMotor1.getConfigurator().apply(slot0Configs);
+    slot0Configs.kP = Constants.ShooterConstants.kP;
+    slot0Configs.kI = Constants.ShooterConstants.kI;
+    slot0Configs.kD = Constants.ShooterConstants.kD;
+
+    shooterMotor1.getConfigurator().apply(slot0Configs);
 
     // shooterMotor2.setControl(new Follower(shooterMotor1.getDeviceID(),
     //   Constants.ShooterConstants.INVERT_FOLLOWER
@@ -58,7 +59,9 @@ public ShooterSubsystem() {
 
   public void shoot(){
 
-    shooterMotor1.setControl(new DutyCycleOut(.525));
+    setSpeedMPS(10); // sets speed in m/s.
+
+    // shooterMotor1.setControl(new DutyCycleOut(.525));
     // setSpeed(Constants.ShooterConstants.SHOOTER_SPEED);
 
   }
@@ -67,12 +70,24 @@ public ShooterSubsystem() {
   //   return shooterMotor1.getVelocity().getValueAsDouble();
   // }
 
-  // public void setSpeed(double speed)
-  // {
-  //   final VelocityVoltage request = new VelocityVoltage(0).withSlot(0);
+  public void setSpeedMPS(double speedMPS)
+  {
+    double speed = MPStoRPS(speedMPS);
+    shooterMotor1.setControl(new VelocityDutyCycle(speed));
+    // final VelocityVoltage request = new VelocityVoltage(0).withSlot(0);
 
-  //   shooterMotor1.setControl(request.withVelocity(speed).withFeedForward(speed));
-  // }
+    // shooterMotor1.setControl(request.withVelocity(speed).withFeedForward(speed));
+  }
+
+  public double MPStoRPS(double speedMPS)
+  {
+    return speedMPS / 0.319; // wheel has a diameter of 0.319 m ((m/s)/m = 1/s)
+  }
+
+  public double RPStoMPS(double speedRPS)
+  {
+    return speedRPS * 0.319; // wheel has a diameter of 0.319 m
+  }
 
   public void stop(){
     shooterMotor1.setControl(new DutyCycleOut(0));

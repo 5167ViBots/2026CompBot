@@ -87,6 +87,7 @@ public class TurretSubsystem extends SubsystemBase {
     // Convert to motor rotations, then pass the rotations value to MM
     double positionRotaton = degreesToMotorRevolutions(positionDegrees);
 
+    System.out.println("setting Turret to " + positionDegrees);
     turretMotor.setControl(new PositionDutyCycle(positionRotaton));
     // turretMotionMagicRequest.Position = positionRotaton;
     // turretMotor.setControl(turretMotionMagicRequest);
@@ -97,7 +98,7 @@ public class TurretSubsystem extends SubsystemBase {
 
   public double degreesToMotorRevolutions(double degrees) {
 
-    return ((degrees / 90) * Constants.TurretConstants.FORWARD_SOFT_LIMIT);
+    return ((-degrees / 90) * Constants.TurretConstants.FORWARD_SOFT_LIMIT);
 
     // double revolutionsPerDegree = (Constants.TurretConstants.GEAR_RATIO) / 360.0;
     // return degrees * revolutionsPerDegree;
@@ -111,7 +112,12 @@ public class TurretSubsystem extends SubsystemBase {
     double currentPositionRotation = turretMotor.getPosition().getValueAsDouble();
     double targetPositionRotation = degreesToMotorRevolutions(currentPositionRotation);
     double toleranceRotation = degreesToMotorRevolutions(Constants.TurretConstants.POSITION_TOLERANCE_DEGREES);
-    return Math.abs(currentPositionRotation - targetPositionRotation) <= toleranceRotation;
+    if (Math.abs(currentPositionRotation - targetPositionRotation) <= toleranceRotation)
+    {
+      System.out.println("Turret At Position");
+      return true;
+    } else return false;
+    // return Math.abs(currentPositionRotation - targetPositionRotation) <= toleranceRotation;
   }
 
   public double getPositionDegrees() {
