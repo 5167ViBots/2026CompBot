@@ -58,7 +58,7 @@ public ShooterSubsystem() {
 
   public void shoot(){
 
-    shooterMotor1.setControl(new DutyCycleOut(0.5));
+    shooterMotor1.setControl(new DutyCycleOut(.525));
     // setSpeed(Constants.ShooterConstants.SHOOTER_SPEED);
 
   }

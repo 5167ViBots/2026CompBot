@@ -4,13 +4,13 @@
 
 package frc.robot.subsystems;
 import frc.robot.Constants;
-import frc.robot.ShuffleboardControl;
 import frc.robot.Constants.TurretConstants;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -23,7 +23,6 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import com.ctre.phoenix6.controls.DutyCycleOut;
-import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 
 import edu.wpi.first.wpilibj2.command.Command;
@@ -52,13 +51,16 @@ public class TurretSubsystem extends SubsystemBase {
     turretConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     turretConfig.CurrentLimits.SupplyCurrentLimit = Constants.TurretConstants.TURRET_CURRENT_LIMIT;
     turretConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+    turretConfig.MotorOutput.PeakForwardDutyCycle = 0.3;
+    turretConfig.MotorOutput.PeakReverseDutyCycle = -0.3;
 
     turretConfig.MotorOutput.Inverted = Constants.TurretConstants.INVERT_MOTOR ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
 
     turretConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
-    turretConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = degreesToMotorRevolutions(Constants.TurretConstants.FORWARD_SOFT_LIMIT_DEGREES);
+    turretConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = Constants.TurretConstants.FORWARD_SOFT_LIMIT;
+    
     turretConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
-    turretConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = degreesToMotorRevolutions(Constants.TurretConstants.REVERSE_SOFT_LIMIT_DEGREES);
+    turretConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = Constants.TurretConstants.REVERSE_SOFT_LIMIT;
 
     // PID Control (motion magic)
 
@@ -67,8 +69,8 @@ public class TurretSubsystem extends SubsystemBase {
         .withKI(Constants.TurretConstants.kI)
         .withKD(Constants.TurretConstants.kD);
       
-    turretConfig.MotionMagic.MotionMagicCruiseVelocity = Constants.TurretConstants.MOTION_CRUISE_VELOCITY / 360 * Constants.TurretConstants.GEAR_RATIO; // convert from degrees/s to ticks/s
-    turretConfig.MotionMagic.MotionMagicAcceleration = Constants.TurretConstants.MOTION_ACCELERATION / 360 * Constants.TurretConstants.GEAR_RATIO; // convert from degrees/s^2 to ticks/s^2
+    // turretConfig.MotionMagic.MotionMagicCruiseVelocity = Constants.TurretConstants.MOTION_CRUISE_VELOCITY / 360 * Constants.TurretConstants.GEAR_RATIO; // convert from degrees/s to ticks/s
+    // turretConfig.MotionMagic.MotionMagicAcceleration = Constants.TurretConstants.MOTION_ACCELERATION / 360 * Constants.TurretConstants.GEAR_RATIO; // convert from degrees/s^2 to ticks/s^2
 
     turretMotor.getConfigurator().apply(turretConfig);
 
@@ -76,30 +78,38 @@ public class TurretSubsystem extends SubsystemBase {
 
   public void setPositionDegrees(double positionDegrees) {
 
+    // Normalize to +-180 (rather than 0-360)
     positionDegrees = (((positionDegrees + 180) % 360) - 180);
+
+    // If we're beyond 90 degrees, go to nearest 90
+    positionDegrees = Math.min(Math.max(positionDegrees, -90), 90);
 
     // Convert to motor rotations, then pass the rotations value to MM
     double positionRotaton = degreesToMotorRevolutions(positionDegrees);
-    turretMotionMagicRequest.Position = positionRotaton;
-    turretMotor.setControl(turretMotionMagicRequest);
+
+    turretMotor.setControl(new PositionDutyCycle(positionRotaton));
+    // turretMotionMagicRequest.Position = positionRotaton;
+    // turretMotor.setControl(turretMotionMagicRequest);
 
     // save "current target" for "getCurrentTarget()"
       currentTargetDegrees = positionDegrees;
   }
 
   public double degreesToMotorRevolutions(double degrees) {
-    double revolutionsPerDegree = (Constants.TurretConstants.GEAR_RATIO) / 360.0;
-    return degrees * revolutionsPerDegree;
+
+    return ((degrees / 90) * Constants.TurretConstants.FORWARD_SOFT_LIMIT);
+
+    // double revolutionsPerDegree = (Constants.TurretConstants.GEAR_RATIO) / 360.0;
+    // return degrees * revolutionsPerDegree;
   }
 
   public double revolutionsToDegrees(double revolutions) {
-    double degreesPerRevolution = 360.0 / (Constants.TurretConstants.GEAR_RATIO);
-    return revolutions * degreesPerRevolution;
+    return (revolutions / Constants.TurretConstants.FORWARD_SOFT_LIMIT) * 90;
   }
 
   public boolean atTargetPosition() {
     double currentPositionRotation = turretMotor.getPosition().getValueAsDouble();
-    double targetPositionRotation = turretMotionMagicRequest.Position;
+    double targetPositionRotation = degreesToMotorRevolutions(currentPositionRotation);
     double toleranceRotation = degreesToMotorRevolutions(Constants.TurretConstants.POSITION_TOLERANCE_DEGREES);
     return Math.abs(currentPositionRotation - targetPositionRotation) <= toleranceRotation;
   }

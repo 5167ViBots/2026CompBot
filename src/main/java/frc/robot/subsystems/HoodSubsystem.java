@@ -6,11 +6,13 @@ package frc.robot.subsystems;
 import frc.robot.Constants;
 import frc.robot.ShuffleboardControl;
 
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
@@ -44,13 +46,16 @@ public class HoodSubsystem extends SubsystemBase {
     hoodConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     hoodConfig.CurrentLimits.SupplyCurrentLimit = Constants.HoodConstants.HOOD_CURRENT_LIMIT;
     hoodConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+    hoodConfig.Feedback.FeedbackRemoteSensorID = 0;
+    hoodConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
+
 
     hoodConfig.MotorOutput.Inverted = Constants.HoodConstants.INVERT_MOTOR ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
 
     hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
-    hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = degreesToMotorRevolutions(Constants.HoodConstants.FORWARD_SOFT_LIMIT_DEGREES);
+    hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = Constants.HoodConstants.UPPER_LIMIT;
     hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
-    hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = degreesToMotorRevolutions(Constants.HoodConstants.REVERSE_SOFT_LIMIT_DEGREES);
+    hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = Constants.HoodConstants.LOWER_LIMIT;
 
     // PID Control (motion magic)
 
@@ -82,18 +87,20 @@ public class HoodSubsystem extends SubsystemBase {
   }
 
   public double degreesToMotorRevolutions(double degrees) {
-    double revolutionsPerDegree = (Constants.HoodConstants.GEAR_RATIO) / 360.0;
+
+    double revolutionsPerDegree = (Constants.HoodConstants.UPPER_LIMIT - Constants.HoodConstants.LOWER_LIMIT) / (60 - 40);
+
     return degrees * revolutionsPerDegree;
   }
 
   public double revolutionsToDegrees(double revolutions) {
-    double degreesPerRevolution = 360.0 / (Constants.HoodConstants.GEAR_RATIO);
+    double degreesPerRevolution = (60 - 40) / (Constants.HoodConstants.UPPER_LIMIT - Constants.HoodConstants.LOWER_LIMIT);
     return revolutions * degreesPerRevolution;
   }
 
   public boolean atTargetPosition() {
-    double currentPositionRotation = hoodMotor.getPosition().getValueAsDouble();
-    double targetPositionRotation = hoodMotionMagicRequest.Position;
+    double currentPositionRotation = degreesToMotorRevolutions(getPositionDegrees());
+    double targetPositionRotation = degreesToMotorRevolutions(getTargetPositionDegrees());
     double toleranceRotation = degreesToMotorRevolutions(Constants.HoodConstants.POSITION_TOLERANCE_DEGREES);
     return Math.abs(currentPositionRotation - targetPositionRotation) <= toleranceRotation;
   }

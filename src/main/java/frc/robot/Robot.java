@@ -34,7 +34,8 @@ public class Robot extends TimedRobot {
         addPeriodic(m_robotContainer::updateFieldAndPoseDisplay, 0.020, 0.005);
         
         // Check limelight every 100 ms, offset 10 ms.
-        addPeriodic(m_robotContainer.getLimelight()::periodic, 0.100, 0.10);
+        addPeriodic(m_robotContainer.getLimelightSide()::periodic, 0.100, 0.10);
+        addPeriodic(m_robotContainer.getLimelightFront()::periodic, 0.100, 0.10);
 
         // update swerve odometry with Limelight vision every 100 ms, offset 35 ms.
         addPeriodic(m_robotContainer::updatePoseWithVision, 0.100, 0.035);
@@ -66,7 +67,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousPeriodic() {
-        dynamicAim();
+        // dynamicAim();
     }
 
     public void dynamicAim() {

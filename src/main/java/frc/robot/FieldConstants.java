@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import frc.robot.Constants.robotStates;
 
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.Unit;
 
 public final class FieldConstants {
 
@@ -190,8 +191,10 @@ public final class FieldConstants {
   public static final double RED_HUB_TARGET_X = (RED_HUB_MAX_X - RED_HUB_MIN_X) / 2.0;
   public static final double RED_HUB_TARGET_Y = (RED_HUB_MAX_Y - RED_HUB_MIN_Y) / 2.0;
 
-  public static final double BLUE_HUB_TARGET_X = (BLUE_HUB_MAX_X - BLUE_HUB_MIN_X) / 2.0;
-  public static final double BLUE_HUB_TARGET_Y = (BLUE_HUB_MAX_Y - BLUE_HUB_MIN_Y) / 2.0;
+  // public static final double BLUE_HUB_TARGET_X = (BLUE_HUB_MAX_X - BLUE_HUB_MIN_X) / 2.0;
+  // public static final double BLUE_HUB_TARGET_Y = (BLUE_HUB_MAX_Y - BLUE_HUB_MIN_Y) / 2.0;
+  public static final double BLUE_HUB_TARGET_X = Units.inchesToMeters(184);
+  public static final double BLUE_HUB_TARGET_Y = Units.inchesToMeters(159);
 
   public static final double BLUE_LEFT_TARGET_Y = Units.inchesToMeters(50.0);
   public static final double BLUE_RIGHT_TARGET_Y = FIELD_WIDTH_Y - BLUE_LEFT_TARGET_Y;
@@ -209,7 +212,7 @@ public final class FieldConstants {
   public static final Translation2d RED_LEFT_TARGET = new Translation2d(RED_TARGET_X, RED_LEFT_TARGET_Y);
   public static final Translation2d RED_RIGHT_TARGET = new Translation2d(RED_TARGET_X, RED_RIGHT_TARGET_Y);
 
-  public static final Pose2d BLUE_LEFT_TRENCH_START = new Pose2d(1.0, 1.0, new Rotation2d(0.0));
+  public static final Pose2d BLUE_LEFT_TRENCH_START = new Pose2d(1.0, 1.0, new Rotation2d(Units.degreesToRadians(0)));
   public static final Pose2d RED_LEFT_TRENCH_START = new Pose2d((FIELD_LENGTH_X - 1.0), (FIELD_WIDTH_Y - 1.0), new Rotation2d(180.0));
 
   // Right is "DOWN" on the official map; Blue is "RIGHT" on the official map

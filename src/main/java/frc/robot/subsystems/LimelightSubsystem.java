@@ -34,8 +34,8 @@ public class LimelightSubsystem extends SubsystemBase {
         new Rotation3d(0, 0, 0)              // camera rotation
     );
 
-    public LimelightSubsystem() {
-        table = NetworkTableInstance.getDefault().getTable(TABLE_NAME);
+    public LimelightSubsystem(String Suffix) {
+        table = NetworkTableInstance.getDefault().getTable(TABLE_NAME + "-" + Suffix);
 
         tv = table.getEntry("tv");
         tx = table.getEntry("tx");

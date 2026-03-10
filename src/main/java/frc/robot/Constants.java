@@ -44,6 +44,7 @@ public final class Constants {
     public static final int CLIMB_RAISE_ARM_BUTTON = 8;
     public static final int CLIMB_LOWER_ARM_BUTTON = 9;
     public static final int TOGGLE_DRIVE_MODE_BUTTON = 10;
+    public static final int STATIC_AIM_BUTTON = 11;
   }
 
   public static class IntakeConstants {
@@ -59,7 +60,7 @@ public final class Constants {
     public static final int shootermotor2ID = -1;
     public static final String shootermotor2CANBus = "rio";
 
-    public static final double SHOOTER_SPEED = 10.0;
+    public static final double SHOOTER_SPEED = 6.0;
 
     public static final double kS = 0.2; // Static gain (volts)
     public static final double kP = 0.1; // Proportional gain (volts per unit error)
@@ -92,8 +93,8 @@ public final class Constants {
     public static final double MOTION_CRUISE_VELOCITY = 600;
     public static final double MOTION_ACCELERATION = 1200;
 
-    public static final double UP_POSITION = 0.33;
-    public static final double DOWN_POSITION = 0.0;
+    public static final double UP_POSITION = 0.31;
+    public static final double DOWN_POSITION = 0.025;
 
     public static final double POSITION_TOLERANCE_DEGREES = 2.0;
     public static final double MAX_CURRENT_AMPS = 40.0;
@@ -125,12 +126,12 @@ public final class Constants {
    }
 
    public static class TurretConstants {
-      public static final int turretMotorID = 77;
+      public static final int turretMotorID = 32;
       public static final String turretMotorCANBus = "rio";
 
-      public static final double kP = 0.8;
+      public static final double kP = 0.5;
       public static final double kI = 0.0; 
-      public static final double kD = 12.0;
+      public static final double kD = 0.01;
 
       public static final double MOTION_CRUISE_VELOCITY = 200;
       public static final double MOTION_ACCELERATION = 800;
@@ -147,8 +148,8 @@ public final class Constants {
 
       public static final double POSITION_TOLERANCE_DEGREES = 2;    // doesn't need to be perfectly accurate, we have a +-3' window
 
-      public static final double FORWARD_SOFT_LIMIT_DEGREES =  180; // forward limit of turret rotation in degrees
-      public static final double REVERSE_SOFT_LIMIT_DEGREES = -180; // reverse limit of turret rotation in degrees
+      public static final double FORWARD_SOFT_LIMIT =  1.92; // forward limit of turret rotation in rotations (from phoenix Tuner)
+      public static final double REVERSE_SOFT_LIMIT = -1.77; // reverse limit of turret rotation in rotations (from phoenix Tuner)
 
       public static final boolean INVERT_MOTOR = false;
 
@@ -164,19 +165,19 @@ public final class Constants {
       public static final int hoodMotorID = 31;
       public static final String hoodMotorCANBus = "rio";
 
-      public static final double kP = 0.8;
+      public static final double kP = 1.0;
       public static final double kI = 0.0;
-      public static final double kD = 12.0;
+      public static final double kD = .02;
       public static final double kV = 0.0;
-      public static final double kG = 0.04; // gravity feedforward gain, needs to be tuned based on weight of hood and friction in system
+      public static final double kG = 0.0; // gravity feedforward gain, needs to be tuned based on weight of hood and friction in system
 
       public static final double MOTION_CRUISE_VELOCITY = 80;
       public static final double MOTION_ACCELERATION = 400;
 
-      public static final double UPPER_LIMIT = 90;
-      public static final double LOWER_LIMIT = 20;
+      public static final double UPPER_LIMIT = .15;
+      public static final double LOWER_LIMIT = 0;
 
-      public static final double GEAR_RATIO = 25.0; // gearing ratio on motor
+      public static final double GEAR_RATIO = 25.0; // gearing ratio on motor - doesn't matter, we're using CANcoder
 
       public static final double POSITION_TOLERANCE_DEGREES = 1.0;
       public static final double MAX_CURRENT_AMPS = 40.0;
@@ -184,8 +185,8 @@ public final class Constants {
       public static final int ENCODER_TICKS_PER_REVOLUTION = 2048;
       public static final double SLEW_RATE_LIMITER = 3.0; // units per second
 
-      public static final double FORWARD_SOFT_LIMIT_DEGREES = LOWER_LIMIT; // forward limit of hood rotation in degrees
-      public static final double REVERSE_SOFT_LIMIT_DEGREES = UPPER_LIMIT; // reverse limit of hood rotation in degrees
+      public static final double FORWARD_SOFT_LIMIT_DEGREES = UPPER_LIMIT; // forward limit of hood rotation in degrees
+      public static final double REVERSE_SOFT_LIMIT_DEGREES = LOWER_LIMIT; // reverse limit of hood rotation in degrees
 
       public static final double HOOD_CURRENT_LIMIT = 30.0; // amps
 

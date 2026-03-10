@@ -10,6 +10,7 @@ import java.util.Map;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -17,6 +18,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
+import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -29,8 +31,11 @@ import frc.robot.commands.IntakeForwardCommand;
 import frc.robot.commands.IntakeReverseCommand;
 import frc.robot.commands.IntakeStopCommand;
 import frc.robot.commands.ShooterContinuousCommand;
+import frc.robot.commands.ShooterStartCommand;
 import frc.robot.commands.ShooterStopCommand;
+import frc.robot.commands.StaticAimCommand;
 import frc.robot.commands.IndexToShooterCommand;
+import frc.robot.commands.IndexVertical;
 import frc.robot.commands.IntakeExtenderUp;
 import frc.robot.commands.IntakeExtenderDown;
 import frc.robot.Constants.BoundaryConstants;
@@ -41,9 +46,11 @@ import frc.robot.commands.IndexReverseCommand;
 import frc.robot.commands.IndexStopCommand;
 import frc.robot.commands.CANdleSetColorCommand;
 import frc.robot.commands.DynamicAimCommand;
+import frc.robot.commands.IndexHorizontal;
 import frc.robot.commands.ClimberArmDownCommand;
 import frc.robot.commands.ClimberArmStopCommand;
 import frc.robot.commands.ClimberArmUpCommand;
+import frc.robot.commands.StaticAimCommand;
 
 import frc.robot.generated.TunerConstants;
 
@@ -69,6 +76,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
@@ -83,11 +91,12 @@ public class RobotContainer {
         IntakeSubsystem intake;
         ShooterSubsystem shooter;
         TurretSubsystem turret;
-        CandleSubsystem candle;
+        // CandleSubsystem candle;
         ClimbSubsystem climber;
 
     // limelight subsystem & initialize timestamp
-        private LimelightSubsystem limelight;
+        private LimelightSubsystem limelightFront;
+        private LimelightSubsystem limelightSide;
         private double lastVisionTimestamp = 0;
 
 
@@ -108,10 +117,10 @@ public class RobotContainer {
 
         private final Telemetry logger = new Telemetry(MaxSpeed);
 
-        private final CommandXboxController joystick = new CommandXboxController(Constants.OperatorConstants.kDriverControllerPort);
+        private final CommandPS5Controller joystick = new CommandPS5Controller(Constants.OperatorConstants.kDriverControllerPort);
 
         private final CommandJoystick buttonBoard = new CommandJoystick(Constants.OperatorConstants.kButtonBoardPort);
-
+        private final CommandJoystick buttonBoardJR = new CommandJoystick(2);
         public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
     // creates a Boundary manager to prevent the robot from running into things (currently unused, see commented-out section in drive default)
@@ -185,7 +194,7 @@ public class RobotContainer {
         return errorDeg > TurretConstants.LARGE_ERROR;
     });
 
-    private boolean isRobotRelative = true; // boolean to switch between fixed/field centric (false) and relative/robot centric (true)
+    private boolean isRobotRelative = false; // boolean to switch between fixed/field centric (false) and relative/robot centric (true)
 
     public RobotContainer() {
 
@@ -197,8 +206,9 @@ public class RobotContainer {
         index           = new IndexSubsystem();
         hood            = new HoodSubsystem();
         turret          = new TurretSubsystem();
-        limelight       = new LimelightSubsystem();
-        candle          = new CandleSubsystem();
+        limelightFront       = new LimelightSubsystem("front");
+        limelightSide      = new LimelightSubsystem("side");
+        // candle          = new CandleSubsystem();
         climber         = new ClimbSubsystem();
 
         // Set the robot position to x = 0.5, y = 0.5, rotation = 0 ONLY for simulation purposes
@@ -212,7 +222,8 @@ public class RobotContainer {
         configureBindings();
         configureDefaults();
         configureShuffleboard();
-        registerPathPlannerCommands();
+        // registerPathPlannerCommands();
+        // registerAutons();
 
 
             // Timer.delay(0.5);
@@ -237,6 +248,26 @@ public class RobotContainer {
          
         }
 
+        public SendableChooser<Command> AutonChooser = new SendableChooser<Command>();
+        //SendableChooser<Command> autochooser; 
+    private void registerAutons() {
+    
+    //Create Shuffleboard Tab
+    var tab = Shuffleboard.getTab("Auton");
+    
+    AutonChooser = AutoBuilder.buildAutoChooser("auton");
+    //Register Auton modes
+    // AutonChooser.addOption("Leave and Score","Leave and Score");
+    // AutonChooser.addOption("auton","auton");
+    
+    
+    // //Set the default Auton
+    // AutonChooser.setDefaultOption("auton","auton");
+    
+    //Add to shuffleboard
+    tab.add(AutonChooser);
+  }
+
     // Set defaults for the various subsystems.
     private void configureDefaults() {
 
@@ -259,8 +290,8 @@ public class RobotContainer {
 
                 if(isRobotRelative) {
                     return new SwerveRequest.RobotCentric()
-                        .withVelocityX(vy)
-                        .withVelocityY(vx)
+                        .withVelocityX(-vy)
+                        .withVelocityY(-vx)
                         .withRotationalRate(omega);
                     } else {
                     return new SwerveRequest.FieldCentric()
@@ -303,10 +334,6 @@ public class RobotContainer {
             Commands.run(turret::stop, turret)
         ); // stops turret from moving when not called.
 
-        candle.setDefaultCommand(
-            Commands.run(candle::defaultBehavior, candle)
-        );
-
         // climber.setDefaultCommand(
         //     Commands.parallel(
         //         Commands.run(climber::stopArm, climber)
@@ -340,14 +367,14 @@ public class RobotContainer {
         // more default commands from Swerve.
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
-        joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-        joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-        joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-        joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+        // joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
+        // joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
+        // joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
+        // joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
         // default command from swerve
         // Reset the field-centric heading on left bumper press.
-        joystick.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
+        // joystick.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
 
         drivetrain.registerTelemetry(logger::telemeterize);
 
@@ -360,6 +387,12 @@ public class RobotContainer {
         buttonBoard.button(Constants.OperatorConstants.CLIMB_BUTTON).onTrue(Commands.runOnce(() -> setRobotState(Constants.robotStates.State.CLIMB)));
         buttonBoard.button(Constants.OperatorConstants.IDLE_BUTTON).onTrue(Commands.runOnce(() -> setRobotState(Constants.robotStates.State.IDLE)));
         buttonBoard.button(Constants.OperatorConstants.STOP_AND_SHOOT_BUTTON).onTrue(Commands.runOnce(() -> setRobotState(Constants.robotStates.State.STOP_AND_SHOOT)));
+        buttonBoard.button(12).onTrue(new IntakeExtenderUp(intakeExtender)); 
+        buttonBoardJR.button(3).onTrue(new IntakeExtenderDown(intakeExtender));
+        buttonBoardJR.button(2).whileTrue(new IntakeForwardCommand(intake));
+        buttonBoardJR.button(6).whileTrue(new IndexHorizontal(index));
+        buttonBoardJR.button(4).whileTrue(new IndexVertical(index));
+        buttonBoardJR.button(3).whileTrue(new IntakeExtenderDown(intakeExtender));
 
         // isShooting pairs FOM and SAS
         // This trigger will activate when we first enter either the FIRE_ON_THE_MOVE or STOP_AND_SHOOT state, but not on subsequent scheduler runs while we're still in that state, due to the debounce.
@@ -374,6 +407,8 @@ public class RobotContainer {
             .onFalse( 
             new IntakeExtenderUp(intakeExtender)
         );
+
+        buttonBoard.button(Constants.OperatorConstants.STATIC_AIM_BUTTON).onTrue(new StaticAimCommand(turret, hood, this));
 
         climbTrigger().and(climbRaiseArmTrigger).whileTrue(new ClimberArmUpCommand(climber));
         climbTrigger().and(climbLowerArmTrigger).whileTrue(new ClimberArmDownCommand(climber));
@@ -410,7 +445,8 @@ public class RobotContainer {
             Commands.parallel(
                 // new CANdleSetColorCommand(candle, Constants.CandleConstants.READY_TO_SHOOT_COLOR, Constants.CandleConstants.NO_STROBE),
                 new ShooterContinuousCommand(shooter),
-                new IntakeForwardCommand(intake)
+                new IntakeForwardCommand(intake),
+                new IndexHorizontal(index)
             )
         );
 
@@ -421,14 +457,17 @@ public class RobotContainer {
             .whileTrue(
             Commands.parallel(
                 // new CANdleSetColorCommand(candle, Constants.CandleConstants.READY_TO_SHOOT_COLOR, Constants.CandleConstants.FAST_STROBE_HZ),
-                new IndexToShooterCommand(index))
+               // new IndexToShooterCommand(index))|
+             //  new IndexVertical(index))
+            new ShooterStartCommand(shooter))
         );
 
         // repeatedly move index forward & reverse 
         // can't unjam while fire button is being pressed
         unJamActive.and(fireButton().negate()).and(isShootingTrigger()).whileTrue(
-            Commands.parallel(new IndexReverseCommand(index),
-            new IntakeReverseCommand(intake)));
+            Commands.parallel(new IndexReverseCommand(index)           
+            // new IntakeReverseCommand(intake)
+           ));
             
 
         // Commands.repeatingSequence(
@@ -481,7 +520,7 @@ public class RobotContainer {
         );
 
         // toggle between fixed and relative drive:
-        buttonBoard.button(Constants.OperatorConstants.TOGGLE_DRIVE_MODE_BUTTON)
+        joystick.square()
             .onTrue(Commands.runOnce(() -> {
                 isRobotRelative = !isRobotRelative;
             }));
@@ -712,13 +751,19 @@ public class RobotContainer {
     }
 
     // Helper function to expose Limelight function (for updating odometry)
-    public LimelightSubsystem getLimelight(){
-        return limelight;
+    public LimelightSubsystem getLimelightFront(){
+        return limelightFront;
+    }
+
+        // Helper function to expose Limelight function (for updating odometry)
+    public LimelightSubsystem getLimelightSide(){
+        return limelightSide;
     }
 
 
+
     public void updatePoseWithVision() {
-        LimelightSubsystem ll = getLimelight();
+        LimelightSubsystem ll = getLimelightFront();
 
         if (ll.hasValidTarget() && ll.getLatestTimestamp() > lastVisionTimestamp) {
             Pose2d visionPose = ll.getLatestPose();
@@ -731,14 +776,27 @@ public class RobotContainer {
     }
 
     public void resetPoseFromLimelight() {
-        LimelightSubsystem ll = getLimelight();
+        LimelightSubsystem ll = getLimelightFront();
 
         // Limelight can take a bit to enable & stabilize (300 ms)
         Timer.delay(0.3);
         for (int i = 0; i <3; i++) {
             if (ll.hasValidTarget() && (ll.getLatestTimestamp() > 0)) {
                 drivetrain.resetPose(ll.getLatestPose());
-                System.out.println("Pose reset from Limelight at attempt " + (i+1));
+                System.out.println("Pose reset from Limelight Front at attempt " + (i+1));
+                return;
+            }
+            Timer.delay(0.1);
+        }
+
+         ll = getLimelightSide();
+
+        // Limelight can take a bit to enable & stabilize (300 ms)
+        Timer.delay(0.3);
+        for (int i = 0; i <3; i++) {
+            if (ll.hasValidTarget() && (ll.getLatestTimestamp() > 0)) {
+                drivetrain.resetPose(ll.getLatestPose());
+                System.out.println("Pose reset from Limelight Side at attempt " + (i+1));
                 return;
             }
             Timer.delay(0.1);

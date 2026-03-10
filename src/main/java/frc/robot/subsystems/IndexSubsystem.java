@@ -48,9 +48,22 @@ public class IndexSubsystem extends SubsystemBase {
     horizontalSpeed(0.0);
     verticalSpeed(0.0);
   }
+  public void stopHoizontal() {
+    horizontalSpeed(0.0);
+  }
+  public void stopVertical() {
+    verticalSpeed(0.0);
+  }
 
   public void runIndex() {
     horizontalSpeed(Constants.IndexConstants.HORIZONTAL_INDEX_SPEED);
+    verticalSpeed(Constants.IndexConstants.VERTICAL_INDEX_SPEED);
+  }
+
+  public void runHorizontalIndex() {
+    horizontalSpeed(Constants.IndexConstants.HORIZONTAL_INDEX_SPEED);
+  }
+   public void runVerticalIndex() {
     verticalSpeed(Constants.IndexConstants.VERTICAL_INDEX_SPEED);
   }
 

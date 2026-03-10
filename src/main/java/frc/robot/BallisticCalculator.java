@@ -23,7 +23,7 @@ public final class BallisticCalculator {
 
         double hoodAngle = solveHoodAngle(distanceM, robotSpeeds, toTarget, targetHeightM);
 
-        double turretDeg = computeTurretAngle(robotPose, toTarget, robotSpeeds, hoodAngle);
+        double turretDeg = computeTurretAngle(robotPose, toTarget, robotSpeeds, hoodAngle) + 180;
 
         return new BallisticSolution(hoodAngle, turretDeg);
     }

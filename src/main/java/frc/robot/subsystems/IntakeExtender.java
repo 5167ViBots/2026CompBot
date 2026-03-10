@@ -130,7 +130,7 @@ public class IntakeExtender extends SubsystemBase {
     }
 
     public boolean atUpPosition() {
-        return ((targetPositionDegrees == Constants.IntakeExtenderConstants.UP_POSITION) && atTargetPosition());
+        return (leaderMotor.getPosition().getValueAsDouble() > 0.29);
     }
 
     public boolean atDownPosition() {
