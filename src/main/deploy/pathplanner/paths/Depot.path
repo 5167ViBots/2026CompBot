@@ -1,0 +1,88 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 1.559,
+        "y": 5.89
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 1.2497954545454546,
+        "y": 5.90145202020202
+      },
+      "isLocked": false,
+      "linkedName": "shootSpot"
+    },
+    {
+      "anchor": {
+        "x": 1.1926515151515156,
+        "y": 5.89
+      },
+      "prevControl": {
+        "x": 1.4327835312188755,
+        "y": 5.8204542247190725
+      },
+      "nextControl": {
+        "x": 0.9525194990841557,
+        "y": 5.959545775280927
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 0.9750631313131319,
+        "y": 5.89
+      },
+      "prevControl": {
+        "x": 1.1872989960798557,
+        "y": 5.757879079223913
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "depot"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.6877192982456114,
+      "rotationDegrees": 179.23227679109726
+    }
+  ],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [
+    {
+      "name": "Pick up fuel",
+      "waypointRelativePos": 0,
+      "endWaypointRelativePos": null,
+      "command": null
+    },
+    {
+      "name": "Shoot",
+      "waypointRelativePos": 0,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 178.7005878094253
+  },
+  "reversed": false,
+  "folder": "LeftAuto",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -50.18075780085115
+  },
+  "useDefaultConstraints": true
+}

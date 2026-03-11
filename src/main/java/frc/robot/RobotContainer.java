@@ -12,9 +12,14 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathfindingCommand;
+import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.pathfinding.LocalADStar;
+import com.pathplanner.lib.pathfinding.Pathfinding;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
@@ -24,16 +29,20 @@ import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.util.Units;
 
 // Commands (these can all be called by frc.robot.commands.*)
 
 import frc.robot.commands.IntakeForwardCommand;
 import frc.robot.commands.IntakeReverseCommand;
 import frc.robot.commands.IntakeStopCommand;
+import frc.robot.commands.RotateBotToDegreeCommand;
 import frc.robot.commands.ShooterContinuousCommand;
 import frc.robot.commands.ShooterStartCommand;
 import frc.robot.commands.ShooterStopCommand;
 import frc.robot.commands.StaticAimCommand;
+import frc.robot.commands.ToggleHorizontalIndexCommand;
+import frc.robot.commands.ToggleVerticalIndexCommand;
 import frc.robot.commands.IndexToShooterCommand;
 import frc.robot.commands.IndexVertical;
 import frc.robot.commands.IntakeExtenderUp;
@@ -71,6 +80,9 @@ import frc.robot.subsystems.ClimbSubsystem;
 import frc.robot.BoundaryManager;
 
 import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
@@ -117,11 +129,12 @@ public class RobotContainer {
 
         private final Telemetry logger = new Telemetry(MaxSpeed);
 
-        private final CommandXboxController joystick = new CommandXboxController(Constants.OperatorConstants.kDriverControllerPort);
+       // private final CommandXboxController joystick = new CommandXboxController(Constants.OperatorConstants.kDriverControllerPort);
+       private final CommandPS5Controller joystick = new CommandPS5Controller(Constants.OperatorConstants.kDriverControllerPort);
 
         private final CommandJoystick buttonBoard = new CommandJoystick(Constants.OperatorConstants.kButtonBoardPort);
         private final CommandJoystick buttonBoardJR = new CommandJoystick(2);
-        public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+        public final CommandSwerveDrivetrain drivetrain;
 
     // creates a Boundary manager to prevent the robot from running into things (currently unused, see commented-out section in drive default)
         private final BoundaryManager boundaryManager = new BoundaryManager();
@@ -199,7 +212,7 @@ public class RobotContainer {
     public RobotContainer() {
 
         // Instantiate subsystems.
-
+        drivetrain = TunerConstants.createDrivetrain();
         intake          = new IntakeSubsystem();
         shooter         = new ShooterSubsystem();
         intakeExtender  = new IntakeExtender();
@@ -218,6 +231,8 @@ public class RobotContainer {
         }
         setRobotState(Constants.robotStates.State.CALIBRATION);
 
+        Pathfinding.setPathfinder(new LocalADStar());
+        PathfindingCommand.warmupCommand().schedule();
         // Run configuration files to set up everything.
         configureBindings();
         configureDefaults();
@@ -326,9 +341,9 @@ public class RobotContainer {
             Commands.run(intakeExtender::stop, intakeExtender)
         ); // default to stopped when not called
 
-        index.setDefaultCommand(
-            Commands.run(index::stop, index)
-        ); // default to up position when not called
+        // index.setDefaultCommand(
+        //     Commands.run(index::stop, index)
+        // ); // default to up position when not called
 
         turret.setDefaultCommand(
             Commands.run(turret::stop, turret)
@@ -390,17 +405,26 @@ public class RobotContainer {
         buttonBoard.button(12).onTrue(new IntakeExtenderUp(intakeExtender)); 
         buttonBoardJR.button(3).onTrue(new IntakeExtenderDown(intakeExtender));
         buttonBoardJR.button(2).whileTrue(new IntakeForwardCommand(intake));
-        buttonBoardJR.button(6).whileTrue(new IndexHorizontal(index));
-        buttonBoardJR.button(4).whileTrue(new IndexVertical(index));
-        buttonBoardJR.button(3).whileTrue(new IntakeExtenderDown(intakeExtender));
+        
+        
+        //\buttonBoardJR.button(1).whileTrue(getPathfindingCommand(2.4384, 2.4384, 180+45).andThen(new RotateBotToDegreeCommand(-135, 5, drivetrain)));
+        buttonBoardJR.button(1).onTrue(new RotateBotToDegreeCommand(-135, 15, drivetrain));
+
+
+
+        buttonBoardJR.button(6).whileTrue(new ToggleHorizontalIndexCommand(index));
+        buttonBoardJR.button(4).whileTrue(new ToggleVerticalIndexCommand(index));
+        buttonBoard.button(10).whileTrue(new ShooterStartCommand(shooter));
+
+
 
         // temporary for testing because phoenixTuner is being stupid.
-        buttonBoard.button(10).whileTrue(new ShooterStartCommand(shooter));
 
         // isShooting pairs FOM and SAS
         // This trigger will activate when we first enter either the FIRE_ON_THE_MOVE or STOP_AND_SHOOT state, but not on subsequent scheduler runs while we're still in that state, due to the debounce.
 
         isShootingTrigger()
+
             // .and(isShootingTrigger().negate().debounce(0.05))
             .onTrue(new IntakeExtenderDown(intakeExtender));
 
@@ -474,12 +498,14 @@ public class RobotContainer {
             .whileTrue(
             Commands.parallel(
                 // new CANdleSetColorCommand(candle, Constants.CandleConstants.READY_TO_SHOOT_COLOR, Constants.CandleConstants.FAST_STROBE_HZ),
-               new IndexToShooterCommand(index)));
+              // new IndexToShooterCommand(index)
+               
+            ));
 
         // repeatedly move index forward & reverse 
         // can't unjam while fire button is being pressed
-        unJamActive.and(fireButton().negate()).and(isShootingTrigger()).whileTrue(
-            Commands.parallel(new IndexReverseCommand(index)           
+        unJamActive.whileTrue( //.and(fireButton().negate()).and(isShootingTrigger())
+            Commands.parallel(new IndexReverseCommand(index)          
             // new IntakeReverseCommand(intake)
            ));
             
@@ -534,7 +560,7 @@ public class RobotContainer {
         );
 
         // toggle between fixed and relative drive:
-        joystick.x()
+        joystick.square()
             .onTrue(Commands.runOnce(() -> {
                 isRobotRelative = !isRobotRelative;
             }));
@@ -657,23 +683,26 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
+        return AutonChooser.getSelected();
+
+        //replace with auto chooser with pathplanner paths
         // Simple drive forward auton
-        final var idle = new SwerveRequest.Idle();
-        return Commands.sequence(
-            // Reset our field centric heading to match the robot
-            // facing away from our alliance station wall (0 deg).
-            drivetrain.runOnce(() -> drivetrain.seedFieldCentric(Rotation2d.kZero)),
-            // Then slowly drive forward (away from us) for 5 seconds.
-            drivetrain.applyRequest(() ->
-                drive.withVelocityX(0.5)
-                    .withVelocityY(0)
-                    .withRotationalRate(0)
-            )
-            .withTimeout(5.0),
-            // Finally idle for the rest of auton
-            drivetrain.applyRequest(() -> idle)
-        );
-        //I'm the bad guy!
+        // final var idle = new SwerveRequest.Idle();
+        // return Commands.sequence(
+        //     // Reset our field centric heading to match the robot
+        //     // facing away from our alliance station wall (0 deg).
+        //     drivetrain.runOnce(() -> drivetrain.seedFieldCentric(Rotation2d.kZero)),
+        //     // Then slowly drive forward (away from us) for 5 seconds.
+        //     drivetrain.applyRequest(() ->
+        //         drive.withVelocityX(0.5)
+        //             .withVelocityY(0)
+        //             .withRotationalRate(0)
+        //     )
+        //     .withTimeout(5.0),
+        //     // Finally idle for the rest of auton
+        //     drivetrain.applyRequest(() -> idle)
+        // );
+        // //I'm the bad guy!
     }
 
     // helper function for changing the Robot State
@@ -817,5 +846,19 @@ public class RobotContainer {
 
         System.out.println("No valid Limelight pose after 3 attempts, using fallback");
         drivetrain.resetPose(FieldConstants.BLUE_LEFT_TRENCH_START);
+    }
+
+    private Command getPathfindingCommand(double x, double y, double rotateDeg){
+        NetworkTableInstance nti = NetworkTableInstance.getDefault();
+
+        var table = nti.getTable("PathPlanning");
+        StructPublisher<Pose2d> drivePose = table.getStructTopic("TargetPose", Pose2d.struct).publish();
+
+    
+        Pose2d targetPose = new Pose2d(x,y, Rotation2d.fromDegrees(rotateDeg));
+        drivePose.set(targetPose);
+
+        PathConstraints constraints = new PathConstraints(3.0, 4.0, Units.degreesToRadians(540), Units.degreesToRadians(720));
+        return AutoBuilder.pathfindToPose(targetPose, constraints, 0);
     }
 }

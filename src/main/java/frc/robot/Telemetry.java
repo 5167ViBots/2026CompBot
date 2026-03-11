@@ -14,6 +14,8 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.wpilibj.PowerDistribution;
+import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -36,10 +38,22 @@ public class Telemetry {
         for (int i = 0; i < 4; ++i) {
             SmartDashboard.putData("Module " + i, m_moduleMechanisms[i]);
         }
+
+        /* Set up the module state Mechanism2d telemetry */
+        for (int i = 0; i < 24; ++i) {
+            powerSlots[i] = powerStateTable.getDoubleTopic("PDH " + i).publish();
+        }
     }
 
     /* What to publish over networktables for telemetry */
     private final NetworkTableInstance inst = NetworkTableInstance.getDefault();
+
+    private final PowerDistribution pdh = new PowerDistribution(1, ModuleType.kRev);
+    private final NetworkTable powerStateTable = inst.getTable("Power Draw");
+    private final DoublePublisher powerSlots[] = new DoublePublisher[24];
+    private final DoublePublisher totalDraw = powerStateTable.getDoubleTopic("Total Draw").publish();
+    private final DoublePublisher Voltage = powerStateTable.getDoubleTopic("Voltage").publish();
+
 
     /* Robot swerve drive state */
     private final NetworkTable driveStateTable = inst.getTable("DriveState");
@@ -117,5 +131,11 @@ public class Telemetry {
             m_moduleDirections[i].setAngle(state.ModuleStates[i].angle);
             m_moduleSpeeds[i].setLength(state.ModuleStates[i].speedMetersPerSecond / (2 * MaxSpeed));
         }
+
+        for (int i = 0 ;i < 24; ++i){
+            powerSlots[i].set(pdh.getCurrent(i));
+        }
+        totalDraw.set(pdh.getTotalCurrent());
+        Voltage.set(pdh.getVoltage());
     }
 }

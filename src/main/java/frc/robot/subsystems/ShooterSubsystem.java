@@ -59,9 +59,9 @@ public ShooterSubsystem() {
 
   public void shoot(){
 
-    setSpeedMPS(10); // sets speed in m/s.
+    //setSpeedMPS(10); // sets speed in m/s.
 
-    // shooterMotor1.setControl(new DutyCycleOut(.525));
+     shooterMotor1.setControl(new DutyCycleOut(1));
     // setSpeed(Constants.ShooterConstants.SHOOTER_SPEED);
 
   }
@@ -73,7 +73,7 @@ public ShooterSubsystem() {
   public void setSpeedMPS(double speedMPS)
   {
     double speed = MPStoRPS(speedMPS);
-    shooterMotor1.setControl(new VelocityDutyCycle(speed));
+    //shooterMotor1.setControl(new VelocityDutyCycle(speed));
     // final VelocityVoltage request = new VelocityVoltage(0).withSlot(0);
 
     // shooterMotor1.setControl(request.withVelocity(speed).withFeedForward(speed));
@@ -90,7 +90,7 @@ public ShooterSubsystem() {
   }
 
   public void stop(){
-    shooterMotor1.setControl(new DutyCycleOut(0));
+    //shooterMotor1.setControl(new DutyCycleOut(0));
   }
 
   /**

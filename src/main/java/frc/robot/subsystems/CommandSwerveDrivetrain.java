@@ -141,6 +141,42 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if (Utils.isSimulation()) {
             startSimThread();
         }
+        RobotConfig config = null;
+
+        try{
+            config = RobotConfig.fromGUISettings();
+        } catch (Exception e) {
+            e.printStackTrace();
+                // minimal default so the program doesn't crash
+            config = new RobotConfig(50, 5,
+                new ModuleConfig(0.05, 0.05, 0.05, new DCMotor(10, 10, 10, 10, 10, 4), 40.0, 1),
+                new Translation2d(0.3, 0.3),
+                new Translation2d( 0.3, -0.3),
+                new Translation2d(-0.3, 0.3),
+                new Translation2d(-0.3, -0.3));
+            System.out.println("PathPlanner config failed, using fallback");
+        }
+
+                AutoBuilder.configure(
+            this::getPose,
+            this::resetPose, 
+            this::getCurrentRobotRelativeSpeeds,
+            (speeds, feedforwards) -> setControl(
+                
+                new SwerveRequest.RobotCentric()
+                    .withVelocityX(speeds.vxMetersPerSecond)
+                    .withVelocityY(speeds.vyMetersPerSecond)
+                    .withRotationalRate(speeds.omegaRadiansPerSecond)
+            ),
+            new PPLTVController(0.02),
+            config,
+            () -> { var alliance = DriverStation.getAlliance();
+                if (alliance.isPresent()){
+                    return alliance.get() == DriverStation.Alliance.Red;
+                }
+                return false;
+            },
+            this);
     }
 
     /**

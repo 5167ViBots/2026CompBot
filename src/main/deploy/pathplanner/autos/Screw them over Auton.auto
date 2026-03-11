@@ -1,0 +1,43 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "New Path"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "clear bump"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "ragebait"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Return"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Hang"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

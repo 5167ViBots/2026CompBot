@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 0.9865151515151522,
+        "y": 5.958939393939395
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 1.7652525252525253,
+        "y": 4.928257575757576
+      },
+      "isLocked": false,
+      "linkedName": "Middle Pick up"
+    },
+    {
+      "anchor": {
+        "x": 2.8990025252525253,
+        "y": 4.023547979797979
+      },
+      "prevControl": {
+        "x": 2.1088131313131315,
+        "y": 4.206780303030303
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "Middle Shoot"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 0.0
+  },
+  "reversed": false,
+  "folder": "LeftAuto",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -179.71062983655943
+  },
+  "useDefaultConstraints": true
+}

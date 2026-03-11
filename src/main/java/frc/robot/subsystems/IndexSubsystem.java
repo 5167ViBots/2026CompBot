@@ -48,7 +48,7 @@ public class IndexSubsystem extends SubsystemBase {
     horizontalSpeed(0.0);
     verticalSpeed(0.0);
   }
-  public void stopHoizontal() {
+  public void stopHorizontal() {
     horizontalSpeed(0.0);
   }
   public void stopVertical() {
@@ -71,6 +71,15 @@ public class IndexSubsystem extends SubsystemBase {
     horizontalSpeed(-Constants.IndexConstants.HORIZONTAL_INDEX_SPEED);
     verticalSpeed(-Constants.IndexConstants.VERTICAL_INDEX_SPEED);
   }
+  public void ToggleHorizontalIndex(){
+    runHIndex = !runHIndex;
+  }
+  public void ToggleVerticalIndex(){
+    runVIndex = !runVIndex;
+  }
+  boolean runHIndex = false;
+  boolean runVIndex = false;
+
 
   /**
    * Example command factory method.
@@ -99,6 +108,23 @@ public class IndexSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    if   (runHIndex)
+    {
+      runHorizontalIndex();
+    }
+    else 
+    {
+      stopHorizontal();
+    }
+
+        if   (runVIndex)
+    {
+      runVerticalIndex();
+    }
+    else 
+    {
+      stopVertical();
+    }
   }
 
   @Override

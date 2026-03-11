@@ -28,7 +28,7 @@ public final class Constants {
 
   public static class OperatorConstants {
 
-    public static final int kDriverControllerPort = 3;
+    public static final int kDriverControllerPort = 0;
 
     public static final int kButtonBoardPort = 1;
 
@@ -50,7 +50,7 @@ public final class Constants {
   public static class IntakeConstants {
     public static final int intakeMotor1ID = 45;
     public static final String intakemotor1CANBus = "rio";
-    public static final double INTAKE_POWER_PERCENT = 0.4;
+    public static final double INTAKE_POWER_PERCENT = 0.25;
   }
 
   public static class ShooterConstants {
