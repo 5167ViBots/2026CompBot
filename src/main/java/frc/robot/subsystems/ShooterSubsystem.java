@@ -61,7 +61,7 @@ public ShooterSubsystem() {
 
     //setSpeedMPS(10); // sets speed in m/s.
 
-     shooterMotor1.setControl(new DutyCycleOut(1));
+     shooterMotor1.setControl(new DutyCycleOut(.5));
     // setSpeed(Constants.ShooterConstants.SHOOTER_SPEED);
 
   }

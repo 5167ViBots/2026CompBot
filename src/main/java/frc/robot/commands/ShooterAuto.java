@@ -4,20 +4,20 @@
 
 package frc.robot.commands;
 
-import frc.robot.subsystems.ClimbSubsystem;
+import frc.robot.subsystems.ShooterSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /** An example command that uses an example subsystem. */
-public class ClimberArmStopCommand extends Command {
+public class ShooterAuto extends Command {
   @SuppressWarnings("PMD.UnusedPrivateField")
-  private final ClimbSubsystem m_subsystem;
+  private final ShooterSubsystem m_subsystem;
 
   /**
    * Creates a new ExampleCommand.
    *
    * @param subsystem The subsystem used by this command.
    */
-  public ClimberArmStopCommand(ClimbSubsystem subsystem) {
+  public ShooterAuto(ShooterSubsystem subsystem) {
     m_subsystem = subsystem;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(subsystem);
@@ -26,26 +26,24 @@ public class ClimberArmStopCommand extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
- 
+        m_subsystem.shoot();
+
   }
 
   // Called every time the scheduler runs while the command is scheduled.
-
   @Override
   public void execute() {
- 
-    m_subsystem.stopArm();
-   }
+  }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_subsystem.stopArm();
+   // m_subsystem.stop();
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false; // end command when hook is at retracted position
+    return true;
   }
 }

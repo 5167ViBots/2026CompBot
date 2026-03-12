@@ -37,6 +37,7 @@ import frc.robot.commands.IntakeForwardCommand;
 import frc.robot.commands.IntakeReverseCommand;
 import frc.robot.commands.IntakeStopCommand;
 import frc.robot.commands.RotateBotToDegreeCommand;
+import frc.robot.commands.ShooterAuto;
 import frc.robot.commands.ShooterContinuousCommand;
 import frc.robot.commands.ShooterStartCommand;
 import frc.robot.commands.ShooterStopCommand;
@@ -45,7 +46,10 @@ import frc.robot.commands.ToggleHorizontalIndexCommand;
 import frc.robot.commands.ToggleVerticalIndexCommand;
 import frc.robot.commands.IndexToShooterCommand;
 import frc.robot.commands.IndexVertical;
+import frc.robot.commands.IntakeAuto;
+import frc.robot.commands.IntakeExtenderAuton;
 import frc.robot.commands.IntakeExtenderUp;
+import frc.robot.commands.IntakeExtenderUpAuto;
 import frc.robot.commands.IntakeExtenderDown;
 import frc.robot.Constants.BoundaryConstants;
 import frc.robot.Constants.CandleConstants;
@@ -55,10 +59,8 @@ import frc.robot.commands.IndexReverseCommand;
 import frc.robot.commands.IndexStopCommand;
 import frc.robot.commands.CANdleSetColorCommand;
 import frc.robot.commands.DynamicAimCommand;
+import frc.robot.commands.IndexAuto;
 import frc.robot.commands.IndexHorizontal;
-import frc.robot.commands.ClimberArmDownCommand;
-import frc.robot.commands.ClimberArmStopCommand;
-import frc.robot.commands.ClimberArmUpCommand;
 import frc.robot.commands.StaticAimCommand;
 
 import frc.robot.generated.TunerConstants;
@@ -75,7 +77,6 @@ import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.SimulationExtensions;
 import frc.robot.subsystems.TurretSubsystem;
 import frc.robot.subsystems.CandleSubsystem;
-import frc.robot.subsystems.ClimbSubsystem;
 
 import frc.robot.BoundaryManager;
 
@@ -104,7 +105,7 @@ public class RobotContainer {
         ShooterSubsystem shooter;
         TurretSubsystem turret;
         // CandleSubsystem candle;
-        ClimbSubsystem climber;
+        // ClimbSubsystem climber;
 
     // limelight subsystem & initialize timestamp
         private LimelightSubsystem limelightFront;
@@ -222,7 +223,7 @@ public class RobotContainer {
         limelightFront       = new LimelightSubsystem("front");
         limelightSide      = new LimelightSubsystem("side");
         // candle          = new CandleSubsystem();
-        climber         = new ClimbSubsystem();
+       // climber         = new ClimbSubsystem();
 
         // Set the robot position to x = 0.5, y = 0.5, rotation = 0 ONLY for simulation purposes
         if (RobotBase.isSimulation()) {
@@ -237,8 +238,8 @@ public class RobotContainer {
         configureBindings();
         configureDefaults();
         configureShuffleboard();
-        // registerPathPlannerCommands();
-        // registerAutons();
+        registerPathPlannerCommands();
+        registerAutons();
 
 
             // Timer.delay(0.5);
@@ -249,17 +250,17 @@ public class RobotContainer {
     }
 
      private void registerPathPlannerCommands() {
-         NamedCommands.registerCommand("Intake", new IntakeForwardCommand(intake));  
+         NamedCommands.registerCommand("Intake", new IntakeAuto(intake));  
          NamedCommands.registerCommand("IntakeStop", new IntakeStopCommand(intake)); 
-         NamedCommands.registerCommand("IntakeExtend", new IntakeExtenderDown(intakeExtender));  
-         NamedCommands.registerCommand("IntakeRetract", new IntakeExtenderUp(intakeExtender)); 
-         NamedCommands.registerCommand("Shoot", new ShooterContinuousCommand(shooter));  
+         NamedCommands.registerCommand("IntakeExtend", new IntakeExtenderAuton(intakeExtender));  
+         NamedCommands.registerCommand("IntakeRetract", new IntakeExtenderUpAuto(intakeExtender)); 
+         NamedCommands.registerCommand("Shoot", new ShooterAuto(shooter));  
          NamedCommands.registerCommand("StopShooting", new ShooterStopCommand(shooter));
-         NamedCommands.registerCommand("Index", new IndexToShooterCommand(index));  
+         NamedCommands.registerCommand("Index", new IndexAuto(index)); 
          NamedCommands.registerCommand("IndexStop", new IndexStopCommand(index));   
-         NamedCommands.registerCommand("ClimbUp", new ClimberArmUpCommand(climber));  
-         NamedCommands.registerCommand("ClimbDown", new ClimberArmDownCommand(climber));
-         NamedCommands.registerCommand("ClimbStop", new ClimberArmStopCommand(climber));
+        //  NamedCommands.registerCommand("ClimbUp", new ClimberArmUpCommand(climber));  
+        //  NamedCommands.registerCommand("ClimbDown", new ClimberArmDownCommand(climber));
+        //  NamedCommands.registerCommand("ClimbStop", new ClimberArmStopCommand(climber));
          
         }
 
@@ -270,7 +271,7 @@ public class RobotContainer {
     //Create Shuffleboard Tab
     var tab = Shuffleboard.getTab("Auton");
     
-    AutonChooser = AutoBuilder.buildAutoChooser("auton");
+    AutonChooser = AutoBuilder.buildAutoChooser("Right Blue");
     //Register Auton modes
     // AutonChooser.addOption("Leave and Score","Leave and Score");
     // AutonChooser.addOption("auton","auton");
@@ -413,7 +414,7 @@ public class RobotContainer {
 
 
         buttonBoardJR.button(6).whileTrue(new ToggleHorizontalIndexCommand(index));
-        buttonBoardJR.button(4).whileTrue(new ToggleVerticalIndexCommand(index));
+        buttonBoardJR.button(4).whileTrue(new IndexVertical(index));
         buttonBoard.button(10).whileTrue(new ShooterStartCommand(shooter));
 
 
@@ -437,8 +438,8 @@ public class RobotContainer {
 
         buttonBoard.button(Constants.OperatorConstants.STATIC_AIM_BUTTON).whileTrue(new StaticAimCommand(turret, hood, shooter, this));
 
-        climbTrigger().and(climbRaiseArmTrigger).whileTrue(new ClimberArmUpCommand(climber));
-        climbTrigger().and(climbLowerArmTrigger).whileTrue(new ClimberArmDownCommand(climber));
+        // climbTrigger().and(climbRaiseArmTrigger).whileTrue(new ClimberArmUpCommand(climber));
+        // climbTrigger().and(climbLowerArmTrigger).whileTrue(new ClimberArmDownCommand(climber));
 
         // for fire on the  move, turn on intake, index, and shooter (unless we're unjamming)
         // If the turret is NOT reorienting, turn on index.
