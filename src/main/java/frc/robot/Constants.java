@@ -148,8 +148,9 @@ public final class Constants {
 
       public static final double POSITION_TOLERANCE_DEGREES = 2;    // doesn't need to be perfectly accurate, we have a +-3' window
 
-      public static final double FORWARD_SOFT_LIMIT =  1.92; // forward limit of turret rotation in rotations (from phoenix Tuner)
-      public static final double REVERSE_SOFT_LIMIT = -1.77; // reverse limit of turret rotation in rotations (from phoenix Tuner)
+      // multiplied these by 10 since we added 10:1 gear on turret
+      public static final double FORWARD_SOFT_LIMIT =  19.2; // forward limit of turret rotation in rotations (from phoenix Tuner)
+      public static final double REVERSE_SOFT_LIMIT = -17.7; // reverse limit of turret rotation in rotations (from phoenix Tuner)
 
       public static final boolean INVERT_MOTOR = false;
 

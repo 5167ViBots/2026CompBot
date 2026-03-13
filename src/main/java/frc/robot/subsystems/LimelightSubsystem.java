@@ -47,7 +47,7 @@ public class LimelightSubsystem extends SubsystemBase {
 
         if (DriverStation.getAlliance().get() == Alliance.Blue)
         {
-            botpose = table.getEntry("botpose_wpiblue"); // absolute coordinte pose
+            botpose = table.getEntry("botpose_wpiblue"); // absolute coordinate pose
         }
         else {
             botpose = table.getEntry("botpose_wpired");

@@ -13,6 +13,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.utility.WheelForceCalculator.Feedforwards;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.ModuleConfig;
+import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 
 import edu.wpi.first.math.Matrix;
@@ -32,6 +33,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.controllers.PPLTVController;
 
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
@@ -155,20 +157,25 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 new Translation2d(-0.3, 0.3),
                 new Translation2d(-0.3, -0.3));
             System.out.println("PathPlanner config failed, using fallback");
+            int i = 1 / (1 - 1);
+
         }
 
-                AutoBuilder.configure(
+       AutoBuilder.configure(
             this::getPose,
             this::resetPose, 
             this::getCurrentRobotRelativeSpeeds,
-            (speeds, feedforwards) -> setControl(
-                
-                new SwerveRequest.RobotCentric()
-                    .withVelocityX(speeds.vxMetersPerSecond)
-                    .withVelocityY(speeds.vyMetersPerSecond)
-                    .withRotationalRate(speeds.omegaRadiansPerSecond)
-            ),
-            new PPLTVController(0.02),
+                (speeds, feedforwards) -> setControl(
+                    new SwerveRequest.ApplyRobotSpeeds().withSpeeds(ChassisSpeeds.discretize(speeds, 0.020))
+                        .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
+                        .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())
+                ),
+                new PPHolonomicDriveController(
+                    // PID constants for translation
+                    new PIDConstants(10, 0, 0),
+                    // PID constants for rotation
+                    new PIDConstants(7, 0, 0)
+                ),
             config,
             () -> { var alliance = DriverStation.getAlliance();
                 if (alliance.isPresent()){
@@ -221,19 +228,24 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 new Translation2d(-0.3, 0.3),
                 new Translation2d(-0.3, -0.3));
             System.out.println("PathPlanner config failed, using fallback");
+            int i = 1 / (1 - 1);
         }
 
         AutoBuilder.configure(
             this::getPose,
             this::resetPose, 
             this::getCurrentRobotRelativeSpeeds,
-            (speeds, feedforwards) -> setControl(
-                new SwerveRequest.RobotCentric()
-                    .withVelocityX(speeds.vxMetersPerSecond)
-                    .withVelocityY(speeds.vyMetersPerSecond)
-                    .withRotationalRate(speeds.omegaRadiansPerSecond)
-            ),
-            new PPLTVController(0.02),
+                (speeds, feedforwards) -> setControl(
+                    new SwerveRequest.ApplyRobotSpeeds().withSpeeds(ChassisSpeeds.discretize(speeds, 0.020))
+                        .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
+                        .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())
+                ),
+                new PPHolonomicDriveController(
+                    // PID constants for translation
+                    new PIDConstants(10, 0, 0),
+                    // PID constants for rotation
+                    new PIDConstants(7, 0, 0)
+                ),
             config,
             () -> { var alliance = DriverStation.getAlliance();
                 if (alliance.isPresent()){
@@ -318,14 +330,15 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
          * This ensures driving behavior doesn't change until an explicit disable event occurs during testing.
          */
         if (!m_hasAppliedOperatorPerspective || DriverStation.isDisabled()) {
-            DriverStation.getAlliance().ifPresent(allianceColor -> {
-                setOperatorPerspectiveForward(
-                    allianceColor == Alliance.Red
-                        ? kRedAlliancePerspectiveRotation
-                        : kBlueAlliancePerspectiveRotation
-                );
+            setOperatorPerspectiveForward(kRedAlliancePerspectiveRotation);
+            // DriverStation.getAlliance().ifPresent(allianceColor -> {
+            //     setOperatorPerspectiveForward(
+            //         allianceColor == Alliance.Red
+            //             ? kRedAlliancePerspectiveRotation
+            //             : kBlueAlliancePerspectiveRotation
+            //     );
                 m_hasAppliedOperatorPerspective = true;
-            });
+            // });
         }
     }
 

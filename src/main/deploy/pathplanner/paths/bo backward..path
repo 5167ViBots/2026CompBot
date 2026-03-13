@@ -3,32 +3,37 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.989964285714287,
-        "y": 2.3505714285714294
+        "x": 3.62702380952381,
+        "y": 7.425452380952382
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.4998928571464751,
-        "y": 1.260011904764559
+        "x": 3.0871428571428576,
+        "y": 7.306678571428573
       },
       "isLocked": false,
-      "linkedName": "Starting Shoot"
+      "linkedName": null
     },
     {
       "anchor": {
-        "x": 0.7332619047619056,
-        "y": 0.6553452380952387
+        "x": 3.0331547619047625,
+        "y": 5.071571428571429
       },
       "prevControl": {
-        "x": 1.5538809523809531,
-        "y": 1.4543690476190494
+        "x": 2.8495952380952385,
+        "y": 5.676238095238095
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Collected from Donny"
+      "linkedName": null
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.7294605809128594,
+      "rotationDegrees": 135.0
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
@@ -42,13 +47,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 147.578935237493
   },
   "reversed": false,
-  "folder": "RightAuto",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -142.43140797117258
+    "rotation": 90.0
   },
   "useDefaultConstraints": true
 }

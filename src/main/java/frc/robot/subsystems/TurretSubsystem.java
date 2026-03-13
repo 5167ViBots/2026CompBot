@@ -51,8 +51,10 @@ public class TurretSubsystem extends SubsystemBase {
     turretConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     turretConfig.CurrentLimits.SupplyCurrentLimit = Constants.TurretConstants.TURRET_CURRENT_LIMIT;
     turretConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
-    turretConfig.MotorOutput.PeakForwardDutyCycle = 0.3;
-    turretConfig.MotorOutput.PeakReverseDutyCycle = -0.3;
+
+// changed peak forward & reverse duty cycles from 0.3 to 1.0 since we added a 10:1 gear ratio
+    turretConfig.MotorOutput.PeakForwardDutyCycle = 1.0;
+    turretConfig.MotorOutput.PeakReverseDutyCycle = -1.0;
 
     turretConfig.MotorOutput.Inverted = Constants.TurretConstants.INVERT_MOTOR ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
 
@@ -78,7 +80,7 @@ public class TurretSubsystem extends SubsystemBase {
 
   public void setPositionDegrees(double positionDegrees) {
 
-    // Normalize to +-180 (rather than 0-360)
+    // Normalize to +-180 (rather than 0-360) [this should be done in ballisticsCalculator, but we'll do it again to make SURE]
     positionDegrees = (((positionDegrees + 180) % 360) - 180);
 
     // If we're beyond 90 degrees, go to nearest 90
@@ -87,7 +89,7 @@ public class TurretSubsystem extends SubsystemBase {
     // Convert to motor rotations, then pass the rotations value to MM
     double positionRotaton = degreesToMotorRevolutions(positionDegrees);
 
-    System.out.println("setting Turret to " + positionDegrees);
+    System.out.println("setting Turret to " + positionDegrees + " rotations " + positionRotaton);
     turretMotor.setControl(new PositionDutyCycle(positionRotaton));
     // turretMotionMagicRequest.Position = positionRotaton;
     // turretMotor.setControl(turretMotionMagicRequest);
@@ -98,7 +100,7 @@ public class TurretSubsystem extends SubsystemBase {
 
   public double degreesToMotorRevolutions(double degrees) {
 
-    return ((-degrees / 90) * Constants.TurretConstants.FORWARD_SOFT_LIMIT);
+    return ((degrees / 90) * Constants.TurretConstants.FORWARD_SOFT_LIMIT);
 
     // double revolutionsPerDegree = (Constants.TurretConstants.GEAR_RATIO) / 360.0;
     // return degrees * revolutionsPerDegree;

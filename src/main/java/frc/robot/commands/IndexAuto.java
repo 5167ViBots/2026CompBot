@@ -27,11 +27,14 @@ public class IndexAuto extends Command {
   @Override
   public void initialize() {
     m_subsystem.runIndex();
+    m_subsystem.ToggleHorizontalIndex();
+    m_subsystem.ToggleVerticalIndex();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    m_subsystem.runIndex();
   }
 
   // Called once the command ends or is interrupted.

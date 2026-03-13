@@ -214,8 +214,8 @@ public final class BallisticCalculator {
 
         double launchFieldRad = Math.atan2(muzzleVy, muzzleVx);
 
-        double turretRad = launchFieldRad - robotPose.getRotation().getRadians();
-        double turretDeg = -((Math.toDegrees(turretRad) + 180) % 360);
+        double turretRad = launchFieldRad - robotPose.getRotation().getRadians() + Math.toRadians(180);
+        double turretDeg = ((Math.toDegrees(turretRad) + 90) % 360) - 90;
 
         return turretDeg;
     }

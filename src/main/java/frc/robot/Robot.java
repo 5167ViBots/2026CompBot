@@ -39,6 +39,7 @@ public class Robot extends TimedRobot {
 
         // update swerve odometry with Limelight vision every 100 ms, offset 35 ms.
         addPeriodic(m_robotContainer::updatePoseWithVision, 0.100, 0.035);
+        addPeriodic(m_robotContainer::updatePoseWithVisionSide, 0.100, 0.055);
     }
 
     @Override
@@ -143,6 +144,9 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
+                if (Constants.ENABLE_LIMELIGHT_INITIALIZATION) { 
+            m_robotContainer.resetPoseFromLimelight();
+        }
         if (m_autonomousCommand != null) {
             CommandScheduler.getInstance().cancel(m_autonomousCommand);
         }

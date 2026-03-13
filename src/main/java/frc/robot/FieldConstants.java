@@ -212,7 +212,7 @@ public final class FieldConstants {
   public static final Translation2d RED_LEFT_TARGET = new Translation2d(RED_TARGET_X, RED_LEFT_TARGET_Y);
   public static final Translation2d RED_RIGHT_TARGET = new Translation2d(RED_TARGET_X, RED_RIGHT_TARGET_Y);
 
-  public static final Pose2d BLUE_LEFT_TRENCH_START = new Pose2d(1.0, 1.0, new Rotation2d(Units.degreesToRadians(0)));
+  public static final Pose2d BLUE_LEFT_TRENCH_START = new Pose2d(3.73, 7.56, new Rotation2d(Units.degreesToRadians(90)));
   public static final Pose2d RED_LEFT_TRENCH_START = new Pose2d((FIELD_LENGTH_X - 1.0), (FIELD_WIDTH_Y - 1.0), new Rotation2d(180.0));
 
   // Right is "DOWN" on the official map; Blue is "RIGHT" on the official map

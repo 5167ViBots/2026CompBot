@@ -59,7 +59,7 @@ public class StaticAimCommand extends Command {
         }
         else
         {
-            shooter.setSpeedMPS(solution.shooterSpeedMps * 5);
+            shooter.setSpeedMPS(solution.shooterSpeedMps * 2);
         }
 
     }

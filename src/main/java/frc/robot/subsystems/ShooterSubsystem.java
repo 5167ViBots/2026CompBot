@@ -61,7 +61,7 @@ public ShooterSubsystem() {
 
     //setSpeedMPS(10); // sets speed in m/s.
 
-     shooterMotor1.setControl(new DutyCycleOut(.5));
+     shooterMotor1.setControl(new DutyCycleOut(.50));
     // setSpeed(Constants.ShooterConstants.SHOOTER_SPEED);
 
   }
@@ -73,7 +73,20 @@ public ShooterSubsystem() {
   public void setSpeedMPS(double speedMPS)
   {
     double speed = MPStoRPS(speedMPS);
-    //shooterMotor1.setControl(new VelocityDutyCycle(speed));
+
+
+
+
+
+    // you guys had this disabled. I re-enabled it. Disable it again if you need to.
+    //oops 
+
+
+
+
+
+    shooterMotor1.setControl(new VelocityDutyCycle(speed));
+
     // final VelocityVoltage request = new VelocityVoltage(0).withSlot(0);
 
     // shooterMotor1.setControl(request.withVelocity(speed).withFeedForward(speed));

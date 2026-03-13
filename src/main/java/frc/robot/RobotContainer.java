@@ -57,6 +57,7 @@ import frc.robot.Constants.TurretConstants;
 import frc.robot.ShuffleboardControl.MotorAccessor;
 import frc.robot.commands.IndexReverseCommand;
 import frc.robot.commands.IndexStopCommand;
+import frc.robot.commands.AdvancedRotateBotToDegreeCommand;
 import frc.robot.commands.CANdleSetColorCommand;
 import frc.robot.commands.DynamicAimCommand;
 import frc.robot.commands.IndexAuto;
@@ -271,7 +272,8 @@ public class RobotContainer {
     //Create Shuffleboard Tab
     var tab = Shuffleboard.getTab("Auton");
     
-    AutonChooser = AutoBuilder.buildAutoChooser("Right Blue");
+    AutonChooser = AutoBuilder.buildAutoChooser("est Auto");
+
     //Register Auton modes
     // AutonChooser.addOption("Leave and Score","Leave and Score");
     // AutonChooser.addOption("auton","auton");
@@ -409,7 +411,7 @@ public class RobotContainer {
         
         
         //\buttonBoardJR.button(1).whileTrue(getPathfindingCommand(2.4384, 2.4384, 180+45).andThen(new RotateBotToDegreeCommand(-135, 5, drivetrain)));
-        buttonBoardJR.button(1).onTrue(new RotateBotToDegreeCommand(-135, 15, drivetrain));
+        buttonBoardJR.button(1).onTrue(new AdvancedRotateBotToDegreeCommand(-45, 15, drivetrain));
 
 
 
@@ -493,13 +495,14 @@ public class RobotContainer {
         //     new ShooterStartCommand(shooter))
         // );
  
+        joystick.cross().onTrue(new IndexAuto(index));
         fireButton()
             // .and(isShootingTrigger())
             .and(unJamActive.negate())
             .whileTrue(
             Commands.parallel(
                 // new CANdleSetColorCommand(candle, Constants.CandleConstants.READY_TO_SHOOT_COLOR, Constants.CandleConstants.FAST_STROBE_HZ),
-              // new IndexToShooterCommand(index)
+              new IndexToShooterCommand(index)
                
             ));
 
@@ -806,6 +809,7 @@ public class RobotContainer {
 
 
     public void updatePoseWithVision() {
+
         LimelightSubsystem ll = getLimelightFront();
 
         if (ll.hasValidTarget() && ll.getLatestTimestamp() > lastVisionTimestamp) {
@@ -817,6 +821,21 @@ public class RobotContainer {
             lastVisionTimestamp = timestamp;
         }
     }
+
+    public void updatePoseWithVisionSide() {
+
+        LimelightSubsystem ll = getLimelightSide();
+
+        if (ll.hasValidTarget() && ll.getLatestTimestamp() > lastVisionTimestamp) {
+            Pose2d visionPose = ll.getLatestPose();
+            double timestamp = ll.getLatestTimestamp();
+
+            drivetrain.addVisionMeasurement(visionPose, timestamp);
+
+            lastVisionTimestamp = timestamp;
+        }
+    }
+
 
     public void resetPoseFromLimelight() {
         LimelightSubsystem ll = getLimelightFront();
@@ -832,7 +851,7 @@ public class RobotContainer {
             Timer.delay(0.1);
         }
 
-         ll = getLimelightSide();
+        ll = getLimelightSide();
 
         // Limelight can take a bit to enable & stabilize (300 ms)
         Timer.delay(0.3);
