@@ -59,11 +59,13 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousInit() {
+
         if (Constants.ENABLE_LIMELIGHT_INITIALIZATION) { 
             m_robotContainer.resetPoseFromLimelight();
         }
 
        m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+       System.out.println(m_autonomousCommand.getName());
 
         if (m_autonomousCommand != null) {
             CommandScheduler.getInstance().schedule(m_autonomousCommand);
@@ -144,7 +146,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
-                if (Constants.ENABLE_LIMELIGHT_INITIALIZATION) { 
+        if (Constants.ENABLE_LIMELIGHT_INITIALIZATION) { 
             m_robotContainer.resetPoseFromLimelight();
         }
         if (m_autonomousCommand != null) {

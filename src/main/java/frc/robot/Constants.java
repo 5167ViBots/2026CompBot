@@ -94,7 +94,7 @@ public final class Constants {
     public static final double MOTION_ACCELERATION = 1200;
 
     public static final double UP_POSITION = 0.31;
-    public static final double DOWN_POSITION = 0.025;
+    public static final double DOWN_POSITION = 0.007;
 
     public static final double POSITION_TOLERANCE_DEGREES = 2.0;
     public static final double MAX_CURRENT_AMPS = 40.0;

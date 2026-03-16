@@ -26,16 +26,15 @@ public class IndexStopCommand extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    IsDone = false;
+    m_subsystem.stop();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
     m_subsystem.stop();
-    IsDone = true;
   }
-  boolean IsDone = false;
+
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
@@ -44,6 +43,6 @@ public class IndexStopCommand extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return IsDone;
+    return true;
   }
 }

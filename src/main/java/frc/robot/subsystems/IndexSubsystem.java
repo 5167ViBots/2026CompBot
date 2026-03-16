@@ -46,6 +46,8 @@ public class IndexSubsystem extends SubsystemBase {
   }
 
   public void stop() {
+    runHIndex = false;
+    runVIndex = false;
     horizontalSpeed(0.0);
     verticalSpeed(0.0);
   }
@@ -77,6 +79,9 @@ public class IndexSubsystem extends SubsystemBase {
   }
   public void ToggleVerticalIndex(){
     runVIndex = !runVIndex;
+  }  
+  public void SetVerticalIndexState(Boolean State){
+    runVIndex = State;
   }
   boolean runHIndex = false;
   boolean runVIndex = false;

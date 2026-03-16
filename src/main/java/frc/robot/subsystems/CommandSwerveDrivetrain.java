@@ -36,6 +36,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.controllers.PPLTVController;
 
+import frc.robot.FieldConstants;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 
 /**
@@ -160,7 +161,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             int i = 1 / (1 - 1);
 
         }
-
+        this.resetPose(FieldConstants.BLUE_LEFT_TRENCH_START);
        AutoBuilder.configure(
             this::getPose,
             this::resetPose, 
@@ -403,6 +404,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
 
     public Pose2d getPose(){
+        //System.out.println("getPose from CommandSwerve");
+        if (getState().Pose == null)
+            {
+                return FieldConstants.BLUE_LEFT_TRENCH_START;
+            }
         return getState().Pose;
     }
 

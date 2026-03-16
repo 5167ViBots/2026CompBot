@@ -37,6 +37,7 @@ import frc.robot.commands.IntakeForwardCommand;
 import frc.robot.commands.IntakeReverseCommand;
 import frc.robot.commands.IntakeStopCommand;
 import frc.robot.commands.RotateBotToDegreeCommand;
+import frc.robot.commands.SetVerticalIndexStateCommand;
 import frc.robot.commands.ShooterAuto;
 import frc.robot.commands.ShooterContinuousCommand;
 import frc.robot.commands.ShooterStartCommand;
@@ -405,18 +406,20 @@ public class RobotContainer {
         buttonBoard.button(Constants.OperatorConstants.CLIMB_BUTTON).onTrue(Commands.runOnce(() -> setRobotState(Constants.robotStates.State.CLIMB)));
         buttonBoard.button(Constants.OperatorConstants.IDLE_BUTTON).onTrue(Commands.runOnce(() -> setRobotState(Constants.robotStates.State.IDLE)));
         buttonBoard.button(Constants.OperatorConstants.STOP_AND_SHOOT_BUTTON).onTrue(Commands.runOnce(() -> setRobotState(Constants.robotStates.State.STOP_AND_SHOOT)));
-        buttonBoard.button(12).onTrue(new IntakeExtenderUp(intakeExtender)); 
-        buttonBoardJR.button(3).onTrue(new IntakeExtenderDown(intakeExtender));
-        buttonBoardJR.button(2).whileTrue(new IntakeForwardCommand(intake));
-        
+        buttonBoardJR.button(6).onTrue(new IntakeExtenderUp(intakeExtender)); 
+        buttonBoardJR.button(4).onTrue(new IntakeExtenderDown(intakeExtender));
+        buttonBoardJR.button(3).whileTrue(new IntakeForwardCommand(intake));
         
         //\buttonBoardJR.button(1).whileTrue(getPathfindingCommand(2.4384, 2.4384, 180+45).andThen(new RotateBotToDegreeCommand(-135, 5, drivetrain)));
         buttonBoardJR.button(1).onTrue(new AdvancedRotateBotToDegreeCommand(-45, 15, drivetrain));
 
 
 
-        buttonBoardJR.button(6).whileTrue(new ToggleHorizontalIndexCommand(index));
-        buttonBoardJR.button(4).whileTrue(new IndexVertical(index));
+        buttonBoardJR.button(7).whileTrue(new ToggleHorizontalIndexCommand(index));
+        // buttonBoardJR.button(5).whileTrue(new IndexVertical(index));
+        buttonBoardJR.button(5).whileTrue(new SetVerticalIndexStateCommand(index,true));
+        buttonBoardJR.button(5).whileFalse(new SetVerticalIndexStateCommand(index,false));
+
         buttonBoard.button(10).whileTrue(new ShooterStartCommand(shooter));
 
 
@@ -495,7 +498,9 @@ public class RobotContainer {
         //     new ShooterStartCommand(shooter))
         // );
  
-        joystick.cross().onTrue(new IndexAuto(index));
+        joystick.circle().whileTrue(drivetrain.applyRequest(() -> new SwerveRequest.SwerveDriveBrake()));
+
+        //joystick.cross().onTrue(new IndexAuto(index));
         fireButton()
             // .and(isShootingTrigger())
             .and(unJamActive.negate())
@@ -523,9 +528,9 @@ public class RobotContainer {
             //     Commands.runOnce(() -> index.stop()),
             //     Commands.waitSeconds(0.05)                          // wait 50 ms between each cycle of unjamming to allow motors to respond and potentially clear the jam
             // ).withTimeout(4.0)                                      // command will stop after 4 seconds even if the button is still held, to prevent potential damage from prolonged unjamming
-        
+
         // while in PUSH state we're only activating the motors. Command above (isshooting) should make sure the intakeExtender moves up.
-        pushTrigger().whileTrue(
+        pushTrigger().onTrue(
             Commands.parallel(
                 // new CANdleSetColorCommand(candle, Constants.CandleConstants.PUSH_COLOR, Constants.CandleConstants.DEFAULT_STROBE_HZ),
                 new ShooterStopCommand(shooter),
