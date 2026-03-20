@@ -158,7 +158,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 new Translation2d(-0.3, 0.3),
                 new Translation2d(-0.3, -0.3));
             System.out.println("PathPlanner config failed, using fallback");
-            int i = 1 / (1 - 1);
 
         }
         this.resetPose(FieldConstants.BLUE_LEFT_TRENCH_START);
@@ -178,10 +177,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                     new PIDConstants(7, 0, 0)
                 ),
             config,
-            () -> { var alliance = DriverStation.getAlliance();
-                if (alliance.isPresent()){
-                    return alliance.get() == DriverStation.Alliance.Red;
-                }
+            //because our position is always relative, we never need to flip paths
+            () -> { //var alliance = DriverStation.getAlliance();
+                // if (alliance.isPresent()){
+                //     return alliance.get() == DriverStation.Alliance.Red;
+                // }
                 return false;
             },
             this);
@@ -229,7 +229,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 new Translation2d(-0.3, 0.3),
                 new Translation2d(-0.3, -0.3));
             System.out.println("PathPlanner config failed, using fallback");
-            int i = 1 / (1 - 1);
         }
 
         AutoBuilder.configure(
@@ -248,10 +247,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                     new PIDConstants(7, 0, 0)
                 ),
             config,
-            () -> { var alliance = DriverStation.getAlliance();
-                if (alliance.isPresent()){
-                    return alliance.get() == DriverStation.Alliance.Red;
-                }
+            //because our coordinates are always relative, we never need to flip position
+            () -> { //var alliance = DriverStation.getAlliance();
+                // if (alliance.isPresent()){
+                //     return alliance.get() == DriverStation.Alliance.Red;
+                // }
                 return false;
             },
             this);

@@ -14,6 +14,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
@@ -53,6 +54,15 @@ public class Telemetry {
     private final DoublePublisher powerSlots[] = new DoublePublisher[24];
     private final DoublePublisher totalDraw = powerStateTable.getDoubleTopic("Total Draw").publish();
     private final DoublePublisher Voltage = powerStateTable.getDoubleTopic("Voltage").publish();
+
+    private final NetworkTable TargettingTable = inst.getTable("Targetting Data");
+    private final DoublePublisher HubDistance = TargettingTable.getDoubleTopic("Distance From Hub").publish();
+    private final DoublePublisher ActualTurretAngle = TargettingTable.getDoubleTopic("Actual Turret Angle").publish();
+    private final DoublePublisher DesiredTurretAngle = TargettingTable.getDoubleTopic("Desired Turret Angle").publish();
+    private final DoublePublisher ShootVoltage = TargettingTable.getDoubleTopic("Desired Shoot Voltage").publish();
+    private final DoublePublisher ShootRPS = TargettingTable.getDoubleTopic("Desired Shoot RPS").publish();
+
+
 
 
     /* Robot swerve drive state */
@@ -116,6 +126,31 @@ public class Telemetry {
         SignalLogger.writeStructArray("DriveState/ModuleTargets", SwerveModuleState.struct, state.ModuleTargets);
         SignalLogger.writeStructArray("DriveState/ModulePositions", SwerveModulePosition.struct, state.ModulePositions);
         SignalLogger.writeDouble("DriveState/OdometryPeriod", state.OdometryPeriod, "seconds");
+
+        for (int i = 0 ;i < 24; ++i){
+            SignalLogger.writeDouble("PDH Amp " + i, pdh.getCurrent(i));
+        }
+        SignalLogger.writeDouble("PDH Total Amp", pdh.getTotalCurrent());
+        SignalLogger.writeDouble("PDH Voltage", pdh.getVoltage());
+
+
+//    private final DoublePublisher ActualTurretAngle = TargettingTable.getDoubleTopic("Actual Turret Angle").publish();
+//    private final DoublePublisher DesiredTurretAngle = TargettingTable.getDoubleTopic("Desired Turret Angle").publish();
+
+        double DistanceFromHub = state.Pose.getTranslation().getDistance(FieldConstants.BLUE_HUB_TARGET);
+        double MaxDistance = 3.855; 
+        double MinDistance = 2;
+        double DistancePercent = (DistanceFromHub / 1.855) - 1;
+
+        double DesiredVoltage = (1.4*DistancePercent)+5.6;
+        double DesiredRPS = (10*DistancePercent)+45;
+
+        ShootVoltage.set(DesiredVoltage);
+        ShootRPS.set(DesiredRPS);
+        HubDistance.set(DistanceFromHub);
+
+        SignalLogger.writeDouble("DistanceFromHub", DistanceFromHub);
+        
 
         /* Telemeterize the pose to a Field2d */
         fieldTypePub.set("Field2d");

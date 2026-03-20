@@ -22,6 +22,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -45,6 +46,8 @@ import frc.robot.commands.ShooterStartCommand;
 import frc.robot.commands.ShooterStopCommand;
 import frc.robot.commands.ShooterSub;
 import frc.robot.commands.StaticAimCommand;
+import frc.robot.commands.StaticAimCommand2;
+import frc.robot.commands.SuperHubShooterCommand;
 import frc.robot.commands.ToggleHorizontalIndexCommand;
 import frc.robot.commands.ToggleVerticalIndexCommand;
 import frc.robot.commands.IndexToShooterCommand;
@@ -100,7 +103,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 // import frc.robot.Constants;
 
 public class RobotContainer {
-
+    public static RobotContainer TheRobot;
     // Subsystems
         //HoodSubsystem hood;
         IndexSubsystem index;
@@ -216,6 +219,7 @@ public class RobotContainer {
 
     public RobotContainer() {
 
+        TheRobot = this; 
         // Instantiate subsystems.
         drivetrain = TunerConstants.createDrivetrain();
         intake          = new IntakeSubsystem();
@@ -338,9 +342,10 @@ public class RobotContainer {
         //     Commands.run(intake::stop, intake)
         // ); // default to stopped when not called
 
-        // shooter.setDefaultCommand(
-        //     Commands.run(shooter::stop, shooter)
-        // ); // default to stopped when not called
+        shooter.setDefaultCommand(
+            new SuperHubShooterCommand(shooter) 
+            //Commands.run(shooter::stop, shooter)
+        ); // default to stopped when not called
 
         intakeExtender.setDefaultCommand(
             Commands.run(intakeExtender::stop, intakeExtender)
@@ -412,7 +417,11 @@ public class RobotContainer {
         buttonBoardJR.button(3).whileTrue(new IntakeForwardCommand(intake));
         
         //\buttonBoardJR.button(1).whileTrue(getPathfindingCommand(2.4384, 2.4384, 180+45).andThen(new RotateBotToDegreeCommand(-135, 5, drivetrain)));
-        buttonBoardJR.button(1).onTrue(new AdvancedRotateBotToDegreeCommand(-45, 15, drivetrain));
+        //buttonBoardJR.button(1).onTrue(new AdvancedRotateBotToDegreeCommand(-45, 15, drivetrain));
+        buttonBoardJR.button(1).onTrue(new StaticAimCommand2(this.turret, this).andThen(new RepeatCommand(new SetVerticalIndexStateCommand(index, true))));
+        buttonBoardJR.button(1).onFalse(new SetVerticalIndexStateCommand(index, false));
+        
+        // (new AdvancedRotateBotToDegreeCommand(-45, 15, drivetrain));
 
 
 
@@ -444,7 +453,8 @@ public class RobotContainer {
             new IntakeExtenderUp(intakeExtender)
         );
 
-        buttonBoard.button(Constants.OperatorConstants.STATIC_AIM_BUTTON).whileTrue(new StaticAimCommand(turret, shooter, this));
+        //buttonBoard.button(Constants.OperatorConstants.STATIC_AIM_BUTTON).whileTrue(new StaticAimCommand(turret, shooter, this));
+        buttonBoard.button(Constants.OperatorConstants.STATIC_AIM_BUTTON).whileTrue(new StaticAimCommand2(turret, this));
 
         // climbTrigger().and(climbRaiseArmTrigger).whileTrue(new ClimberArmUpCommand(climber));
         // climbTrigger().and(climbLowerArmTrigger).whileTrue(new ClimberArmDownCommand(climber));
