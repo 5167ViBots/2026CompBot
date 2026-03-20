@@ -100,7 +100,7 @@ public class Robot extends TimedRobot {
             );
 
         m_robotContainer.turret.setPositionDegrees(solution.turretAngleDegrees);
-        m_robotContainer.hood.setPositionDegrees(solution.hoodAngleDegrees);
+       // m_robotContainer.hood.setPositionDegrees(solution.hoodAngleDegrees);
     }
 
     private Translation2d getTargetPosition() {

@@ -38,10 +38,12 @@ import frc.robot.commands.IntakeReverseCommand;
 import frc.robot.commands.IntakeStopCommand;
 import frc.robot.commands.RotateBotToDegreeCommand;
 import frc.robot.commands.SetVerticalIndexStateCommand;
+import frc.robot.commands.ShooterAdd;
 import frc.robot.commands.ShooterAuto;
 import frc.robot.commands.ShooterContinuousCommand;
 import frc.robot.commands.ShooterStartCommand;
 import frc.robot.commands.ShooterStopCommand;
+import frc.robot.commands.ShooterSub;
 import frc.robot.commands.StaticAimCommand;
 import frc.robot.commands.ToggleHorizontalIndexCommand;
 import frc.robot.commands.ToggleVerticalIndexCommand;
@@ -70,7 +72,7 @@ import frc.robot.generated.TunerConstants;
 // Subsystems (these can all be called by frc.robot.subsystems.*)
 
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.HoodSubsystem;
+//import frc.robot.subsystems.HoodSubsystem;
 import frc.robot.subsystems.IndexSubsystem;
 import frc.robot.subsystems.IntakeExtender;
 import frc.robot.subsystems.IntakeSubsystem;
@@ -100,7 +102,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 public class RobotContainer {
 
     // Subsystems
-        HoodSubsystem hood;
+        //HoodSubsystem hood;
         IndexSubsystem index;
         IntakeExtender intakeExtender;
         IntakeSubsystem intake;
@@ -220,7 +222,7 @@ public class RobotContainer {
         shooter         = new ShooterSubsystem();
         intakeExtender  = new IntakeExtender();
         index           = new IndexSubsystem();
-        hood            = new HoodSubsystem();
+        //hood            = new HoodSubsystem();
         turret          = new TurretSubsystem();
         limelightFront       = new LimelightSubsystem("front");
         limelightSide      = new LimelightSubsystem("side");
@@ -229,7 +231,7 @@ public class RobotContainer {
 
         // Set the robot position to x = 0.5, y = 0.5, rotation = 0 ONLY for simulation purposes
         if (RobotBase.isSimulation()) {
-            new SimulationExtensions(turret, hood);
+            new SimulationExtensions(turret);
             drivetrain.resetPose(new Pose2d( 0.5, 0.5, new Rotation2d(0)));
         }
         setRobotState(Constants.robotStates.State.CALIBRATION);
@@ -263,7 +265,6 @@ public class RobotContainer {
         //  NamedCommands.registerCommand("ClimbUp", new ClimberArmUpCommand(climber));  
         //  NamedCommands.registerCommand("ClimbDown", new ClimberArmDownCommand(climber));
         //  NamedCommands.registerCommand("ClimbStop", new ClimberArmStopCommand(climber));
-         
         }
 
         public SendableChooser<Command> AutonChooser = new SendableChooser<Command>();
@@ -421,6 +422,8 @@ public class RobotContainer {
         buttonBoardJR.button(5).whileFalse(new SetVerticalIndexStateCommand(index,false));
 
         buttonBoard.button(10).whileTrue(new ShooterStartCommand(shooter));
+        buttonBoard.button(8).onTrue(new ShooterAdd(shooter));
+        buttonBoard.button(9).onTrue(new ShooterSub(shooter));
 
 
 
@@ -441,7 +444,7 @@ public class RobotContainer {
             new IntakeExtenderUp(intakeExtender)
         );
 
-        buttonBoard.button(Constants.OperatorConstants.STATIC_AIM_BUTTON).whileTrue(new StaticAimCommand(turret, hood, shooter, this));
+        buttonBoard.button(Constants.OperatorConstants.STATIC_AIM_BUTTON).whileTrue(new StaticAimCommand(turret, shooter, this));
 
         // climbTrigger().and(climbRaiseArmTrigger).whileTrue(new ClimberArmUpCommand(climber));
         // climbTrigger().and(climbLowerArmTrigger).whileTrue(new ClimberArmDownCommand(climber));
@@ -470,7 +473,7 @@ public class RobotContainer {
             )
         );
 
-        fireOnMoveTrigger().whileTrue(new DynamicAimCommand(turret, hood, shooter, this));                                          // in "FOM" state we use dynamic aiming
+        fireOnMoveTrigger().whileTrue(new DynamicAimCommand(turret, shooter, this));                                          // in "FOM" state we use dynamic aiming
 
         // for stop and shoot, if we're not unjamming or shooting, turn on the intake, turn off shooter & index.
         stopAndShootTrigger()
@@ -783,7 +786,7 @@ public class RobotContainer {
             robotPoseEntry.setString(getPoseString());
         }
         if (hoodAngleDisplay != null) {
-            hoodAngleDisplay.setDouble(hood.getPositionDegrees());
+          //  hoodAngleDisplay.setDouble(hood.getPositionDegrees());
         }
         if(turretAngleDisplay != null) {
             turretAngleDisplay.setDouble(turret.getPositionDegrees());

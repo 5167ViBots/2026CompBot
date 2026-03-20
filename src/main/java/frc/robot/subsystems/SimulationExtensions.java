@@ -14,12 +14,12 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.TurretSubsystem;
-import frc.robot.subsystems.HoodSubsystem;
+//import frc.robot.subsystems.HoodSubsystem;
 
 public class SimulationExtensions extends SubsystemBase {
 
     private final TurretSubsystem turret;
-    private final HoodSubsystem hood;
+    //private final HoodSubsystem hood;
 
     // Mechanism objects
     private Mechanism2d turretMech;
@@ -28,9 +28,9 @@ public class SimulationExtensions extends SubsystemBase {
     private Mechanism2d hoodMech;
     private MechanismLigament2d hoodArm;
 
-    public SimulationExtensions(TurretSubsystem turret, HoodSubsystem hood) {
+    public SimulationExtensions(TurretSubsystem turret) {
         this.turret = turret;
-        this.hood = hood;
+        //this.hood = hood;
 
         if (!RobotBase.isSimulation()) {
             return;  // skip everything on real robot
@@ -65,8 +65,8 @@ public class SimulationExtensions extends SubsystemBase {
         }
 
         if (hoodArm != null) {
-            double hoodAngleDeg = hood.getPositionDegrees();  // hood angle method
-            hoodArm.setAngle(hoodAngleDeg);
+          //  double hoodAngleDeg = hood.getPositionDegrees();  // hood angle method
+           // hoodArm.setAngle(hoodAngleDeg);
         }
     }
 

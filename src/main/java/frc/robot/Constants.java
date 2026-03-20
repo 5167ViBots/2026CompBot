@@ -54,13 +54,13 @@ public final class Constants {
   }
 
   public static class ShooterConstants {
-    public static final int shooterMotor1ID = 0;
+    public static final int shooterMotor1ID = 28; //0
     public static final String shootermotor1CANBus = "rio";
 
-    public static final int shootermotor2ID = -1;
+    public static final int shootermotor2ID = 29;
     public static final String shootermotor2CANBus = "rio";
 
-    public static final double SHOOTER_SPEED = 0.6;
+    public static final double SHOOTER_SPEED = 0.75;
 
     public static final double kS = 0.0; // Static gain (volts)
     public static final double kP = 0.07; // Proportional gain (volts per unit error)
@@ -119,7 +119,7 @@ public final class Constants {
     public static final boolean INVERT_FOLLOWER = false;
 
     public static final double HORIZONTAL_INDEX_SPEED = 0.5;
-    public static final double VERTICAL_INDEX_SPEED = 0.5;
+    public static final double VERTICAL_INDEX_SPEED = 0.65;
 
     public static final double INDEX_CURRENT_LIMIT = 30.0; // amps
     public static final boolean INDEX_CURRENT_LIMIT_ENABLE = true;

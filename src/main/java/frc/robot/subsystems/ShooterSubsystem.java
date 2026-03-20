@@ -9,6 +9,7 @@ import frc.robot.ShuffleboardControl.MotorAccessor;
 
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
@@ -23,11 +24,11 @@ public class ShooterSubsystem extends SubsystemBase {
   /** Creates a new ShooterSubsystem. */
 private TalonFX shooterMotor1;
 private TalonFX shooterMotor2;
-
+double fireSpeed = .6;
 public ShooterSubsystem() {
 
     shooterMotor1 = new TalonFX(Constants.ShooterConstants.shooterMotor1ID, Constants.ShooterConstants.shootermotor1CANBus);
-    // shooterMotor2 = new TalonFX(Constants.ShooterConstants.shootermotor2ID, Constants.ShooterConstants.shootermotor2CANBus);
+    shooterMotor2 = new TalonFX(Constants.ShooterConstants.shootermotor2ID, Constants.ShooterConstants.shootermotor2CANBus);
     var slot0Configs = new Slot0Configs();
     // slot0Configs.kS = Constants.ShooterConstants.kS;
     // slot0Configs.kV = Constants.ShooterConstants.kV;
@@ -36,11 +37,10 @@ public ShooterSubsystem() {
     slot0Configs.kD = Constants.ShooterConstants.kD;
 
     shooterMotor1.getConfigurator().apply(slot0Configs);
-
-    // shooterMotor2.setControl(new Follower(shooterMotor1.getDeviceID(),
-    //   Constants.ShooterConstants.INVERT_FOLLOWER
-    //     ? MotorAlignmentValue.Opposed
-    //     : MotorAlignmentValue.Aligned));
+     shooterMotor2.setControl(new Follower(shooterMotor1.getDeviceID(),
+       Constants.ShooterConstants.INVERT_FOLLOWER
+       ? MotorAlignmentValue.Opposed
+       : MotorAlignmentValue.Aligned));
   }
 
   /**
@@ -61,9 +61,24 @@ public ShooterSubsystem() {
 
     //setSpeedMPS(10); // sets speed in m/s.
 
-     shooterMotor1.setControl(new DutyCycleOut(.49));
+     shooterMotor1.setControl(new DutyCycleOut(fireSpeed));
+
     // setSpeed(Constants.ShooterConstants.SHOOTER_SPEED);
 
+  }
+
+  public void shootAdd(){
+    fireSpeed = fireSpeed + .05;
+    if (fireSpeed > .8){
+    fireSpeed = .8;
+    }
+    
+  }
+  public void shootSub(){
+    fireSpeed = fireSpeed - .05;
+    if (fireSpeed < .45){
+    fireSpeed = .45;
+    }
   }
 
   // public double getSpeed(){

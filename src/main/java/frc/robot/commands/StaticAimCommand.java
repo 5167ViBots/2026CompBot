@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.TurretSubsystem;
-import frc.robot.subsystems.HoodSubsystem;
+//import frc.robot.subsystems.HoodSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import edu.wpi.first.math.geometry.Translation2d;
 import frc.robot.BallisticCalculator;
@@ -21,21 +21,21 @@ import frc.robot.FieldConstants.FieldRegion;
 public class StaticAimCommand extends Command {
 
     private final TurretSubsystem turret;
-    private final HoodSubsystem hood;
+   // private final HoodSubsystem hood;
     private final ShooterSubsystem shooter;
     private final RobotContainer robotContainer;   // for pose, speeds, and field state
 
     private BallisticSolution solution;
 
-    public StaticAimCommand(TurretSubsystem turret, HoodSubsystem hood, ShooterSubsystem shooter, RobotContainer robotContainer) {
+    public StaticAimCommand(TurretSubsystem turret, ShooterSubsystem shooter, RobotContainer robotContainer) {
         this.turret = turret;
-        this.hood = hood;
+       // this.hood = hood;
         this.shooter = shooter;
         this.robotContainer = robotContainer;
 
         solution = new BallisticSolution(0, 0, 0);
 
-        addRequirements(turret, hood, shooter);   // important: prevents conflicts
+        addRequirements(turret, shooter);   // important: prevents conflicts
     }
 
 
@@ -51,7 +51,7 @@ public class StaticAimCommand extends Command {
         calculateValues();
 
         turret.setPositionDegrees(solution.turretAngleDegrees);
-        hood.setPositionDegrees(solution.hoodAngleDegrees);
+        //hood.setPositionDegrees(solution.hoodAngleDegrees);
 
         if (Double.isNaN(solution.shooterSpeedMps))
         {

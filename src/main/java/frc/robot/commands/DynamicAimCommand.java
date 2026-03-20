@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.TurretSubsystem;
-import frc.robot.subsystems.HoodSubsystem;
+//import frc.robot.subsystems.HoodSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import edu.wpi.first.math.geometry.Translation2d;
 import frc.robot.BallisticCalculator;
@@ -20,17 +20,17 @@ import frc.robot.FieldConstants.FieldRegion;
 public class DynamicAimCommand extends Command {
 
     private final TurretSubsystem turret;
-    private final HoodSubsystem hood;
+   // private final HoodSubsystem hood;
     private final ShooterSubsystem shooter;
     private final RobotContainer robotContainer;   // for pose, speeds, and field state
 
-    public DynamicAimCommand(TurretSubsystem turret, HoodSubsystem hood, ShooterSubsystem shooter, RobotContainer robotContainer) {
+    public DynamicAimCommand(TurretSubsystem turret, ShooterSubsystem shooter, RobotContainer robotContainer) {
         this.turret = turret;
-        this.hood = hood;
+        //this.hood = hood;
         this.shooter = shooter;
         this.robotContainer = robotContainer;
 
-        addRequirements(turret, hood);   // important: prevents conflicts
+        addRequirements(turret);   // important: prevents conflicts
     }
 
     @Override
@@ -52,7 +52,7 @@ public class DynamicAimCommand extends Command {
             );
 
         turret.setPositionDegrees(solution.turretAngleDegrees);
-        hood.setPositionDegrees(solution.hoodAngleDegrees);
+      //  hood.setPositionDegrees(solution.hoodAngleDegrees);
         if (Double.isNaN(solution.shooterSpeedMps))
         {
             shooter.setSpeedMPS(Constants.ShooterConstants.SHOOTER_SPEED);
