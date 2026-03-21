@@ -5,15 +5,9 @@
     "data": {
       "commands": [
         {
-          "type": "named",
-          "data": {
-            "name": "Shoot"
-          }
-        },
-        {
           "type": "path",
           "data": {
-            "pathName": "Red bo backward."
+            "pathName": "bo backward."
           }
         },
         {
@@ -25,13 +19,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 2.0
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "StopShooting"
+            "waitTime": 2.5
           }
         },
         {
@@ -43,25 +31,61 @@
         {
           "type": "named",
           "data": {
-            "name": "IntakeStop"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
             "name": "IntakeExtend"
           }
         },
         {
-          "type": "wait",
+          "type": "path",
           "data": {
-            "waitTime": 240.0
+            "pathName": "getFuel"
           }
         },
         {
           "type": "named",
           "data": {
             "name": "Intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "fuelPickup"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.65
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "fuelEnd"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "IntakeStop"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Index"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 4.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "IndexStop"
           }
         }
       ]

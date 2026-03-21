@@ -49,6 +49,7 @@ import frc.robot.commands.StaticAimCommand;
 import frc.robot.commands.StaticAimCommand2;
 import frc.robot.commands.SuperHubShooterCommand;
 import frc.robot.commands.ToggleHorizontalIndexCommand;
+import frc.robot.commands.ToggleIntakeCommand;
 import frc.robot.commands.ToggleVerticalIndexCommand;
 import frc.robot.commands.IndexToShooterCommand;
 import frc.robot.commands.IndexVertical;
@@ -116,6 +117,7 @@ public class RobotContainer {
 
     // limelight subsystem & initialize timestamp
         private LimelightSubsystem limelightFront;
+        private LimelightSubsystem limelightBack;
         private LimelightSubsystem limelightSide;
         private double lastVisionTimestamp = 0;
 
@@ -229,6 +231,7 @@ public class RobotContainer {
         //hood            = new HoodSubsystem();
         turret          = new TurretSubsystem();
         limelightFront       = new LimelightSubsystem("front");
+        limelightBack       = new LimelightSubsystem("back");
         limelightSide      = new LimelightSubsystem("side");
         // candle          = new CandleSubsystem();
        // climber         = new ClimbSubsystem();
@@ -258,11 +261,11 @@ public class RobotContainer {
     }
 
      private void registerPathPlannerCommands() {
-         NamedCommands.registerCommand("Intake", new IntakeAuto(intake));  
+         NamedCommands.registerCommand("Intake", new ToggleIntakeCommand(intake));  
          NamedCommands.registerCommand("IntakeStop", new IntakeStopCommand(intake)); 
          NamedCommands.registerCommand("IntakeExtend", new IntakeExtenderAuton(intakeExtender));  
          NamedCommands.registerCommand("IntakeRetract", new IntakeExtenderUpAuto(intakeExtender)); 
-         NamedCommands.registerCommand("Shoot", new ShooterAuto(shooter));  
+        // NamedCommands.registerCommand("Shoot", new ShooterAuto(shooter));  
          NamedCommands.registerCommand("StopShooting", new ShooterStopCommand(shooter));
          NamedCommands.registerCommand("Index", new IndexAuto(index)); 
          NamedCommands.registerCommand("IndexStop", new IndexStopCommand(index));   
@@ -414,7 +417,8 @@ public class RobotContainer {
         buttonBoard.button(Constants.OperatorConstants.STOP_AND_SHOOT_BUTTON).onTrue(Commands.runOnce(() -> setRobotState(Constants.robotStates.State.STOP_AND_SHOOT)));
         buttonBoardJR.button(6).onTrue(new IntakeExtenderUp(intakeExtender)); 
         buttonBoardJR.button(4).onTrue(new IntakeExtenderDown(intakeExtender));
-        buttonBoardJR.button(3).whileTrue(new IntakeForwardCommand(intake));
+        buttonBoardJR.button(3).whileTrue(new ToggleIntakeCommand(intake));
+        // buttonBoardJR.button(3).whileTrue(new IntakeForwardCommand(intake));
         
         //\buttonBoardJR.button(1).whileTrue(getPathfindingCommand(2.4384, 2.4384, 180+45).andThen(new RotateBotToDegreeCommand(-135, 5, drivetrain)));
         //buttonBoardJR.button(1).onTrue(new AdvancedRotateBotToDegreeCommand(-45, 15, drivetrain));
@@ -820,6 +824,11 @@ public class RobotContainer {
     }
 
         // Helper function to expose Limelight function (for updating odometry)
+    public LimelightSubsystem getLimelightBack(){
+        return limelightBack;
+    }
+
+        // Helper function to expose Limelight function (for updating odometry)
     public LimelightSubsystem getLimelightSide(){
         return limelightSide;
     }
@@ -843,6 +852,21 @@ public class RobotContainer {
     public void updatePoseWithVisionSide() {
 
         LimelightSubsystem ll = getLimelightSide();
+
+        if (ll.hasValidTarget() && ll.getLatestTimestamp() > lastVisionTimestamp) {
+            Pose2d visionPose = ll.getLatestPose();
+            double timestamp = ll.getLatestTimestamp();
+
+            drivetrain.addVisionMeasurement(visionPose, timestamp);
+
+            lastVisionTimestamp = timestamp;
+        }
+    }
+
+    
+    public void updatePoseWithVisionBack() {
+
+        LimelightSubsystem ll = getLimelightBack();
 
         if (ll.hasValidTarget() && ll.getLatestTimestamp() > lastVisionTimestamp) {
             Pose2d visionPose = ll.getLatestPose();

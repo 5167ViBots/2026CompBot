@@ -75,8 +75,28 @@ public class IntakeSubsystem extends SubsystemBase {
     return false;
   }
 
+   boolean RunIntake = false;
+
+    public void ToggleIntake() {
+        
+        RunIntake = !RunIntake;
+    }
+
+    
+    public void SetIntakeState(Boolean State) {
+        
+        RunIntake = State;
+    }
+
+
   @Override
   public void periodic() {
+
+    if (RunIntake){
+      intake();
+    }else{
+      stop();
+    }
     // This method will be called once per scheduler run
 
   }

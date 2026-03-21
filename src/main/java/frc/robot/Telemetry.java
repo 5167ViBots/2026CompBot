@@ -78,6 +78,9 @@ public class Telemetry {
     /* Robot pose for field positioning */
     private final NetworkTable table = inst.getTable("Pose");
     private final DoubleArrayPublisher fieldPub = table.getDoubleArrayTopic("robotPose").publish();
+    private final DoubleArrayPublisher visFrontPosePub = table.getDoubleArrayTopic("Vision Front Pose").publish();
+    private final DoubleArrayPublisher visSidePosePub = table.getDoubleArrayTopic("Vision Side Pose").publish();
+    private final DoubleArrayPublisher visBackPosePub = table.getDoubleArrayTopic("Vision Back Pose").publish();
     private final StringPublisher fieldTypePub = table.getStringTopic(".type").publish();
 
     /* Mechanisms to represent the swerve module states */
@@ -107,6 +110,9 @@ public class Telemetry {
     };
 
     private final double[] m_poseArray = new double[3];
+    private final double[] frontPoseArray = new double[3];
+    private final double[] sidePoseArray = new double[3];
+    private final double[] backPoseArray = new double[3];
 
     /** Accept the swerve drive state and telemeterize it to SmartDashboard and SignalLogger. */
     public void telemeterize(SwerveDriveState state) {
@@ -134,6 +140,11 @@ public class Telemetry {
         SignalLogger.writeDouble("PDH Voltage", pdh.getVoltage());
 
 
+        SignalLogger.writeStruct("Vision/Front", Pose2d.struct, RobotContainer.TheRobot.getLimelightFront().getLatestPose());
+        SignalLogger.writeStruct("Vision/Side", Pose2d.struct, RobotContainer.TheRobot.getLimelightSide().getLatestPose());
+        SignalLogger.writeStruct("Vision/Back", Pose2d.struct, RobotContainer.TheRobot.getLimelightBack().getLatestPose());
+
+
 //    private final DoublePublisher ActualTurretAngle = TargettingTable.getDoubleTopic("Actual Turret Angle").publish();
 //    private final DoublePublisher DesiredTurretAngle = TargettingTable.getDoubleTopic("Desired Turret Angle").publish();
 
@@ -151,6 +162,7 @@ public class Telemetry {
 
         SignalLogger.writeDouble("DistanceFromHub", DistanceFromHub);
         
+        
 
         /* Telemeterize the pose to a Field2d */
         fieldTypePub.set("Field2d");
@@ -159,6 +171,25 @@ public class Telemetry {
         m_poseArray[1] = state.Pose.getY();
         m_poseArray[2] = state.Pose.getRotation().getRadians();
         fieldPub.set(m_poseArray);
+
+        Pose2d VisionPose = RobotContainer.TheRobot.getLimelightFront().getLatestPose();
+        frontPoseArray[0] = VisionPose.getX();
+        frontPoseArray[1] = VisionPose.getY();
+        frontPoseArray[2] = VisionPose.getRotation().getRadians();
+        visFrontPosePub.set(frontPoseArray);
+
+        VisionPose = RobotContainer.TheRobot.getLimelightSide().getLatestPose();
+        sidePoseArray[0] = VisionPose.getX();
+        sidePoseArray[1] = VisionPose.getY();
+        sidePoseArray[2] = VisionPose.getRotation().getRadians();
+        visSidePosePub.set(sidePoseArray);
+
+        VisionPose = RobotContainer.TheRobot.getLimelightBack().getLatestPose();
+        backPoseArray[0] = VisionPose.getX();
+        backPoseArray[1] = VisionPose.getY();
+        backPoseArray[2] = VisionPose.getRotation().getRadians();
+        visBackPosePub.set(backPoseArray);
+        
 
         /* Telemeterize each module state to a Mechanism2d */
         for (int i = 0; i < 4; ++i) {

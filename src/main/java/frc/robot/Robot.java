@@ -36,10 +36,12 @@ public class Robot extends TimedRobot {
         // Check limelight every 100 ms, offset 10 ms.
         addPeriodic(m_robotContainer.getLimelightSide()::periodic, 0.100, 0.10);
         addPeriodic(m_robotContainer.getLimelightFront()::periodic, 0.100, 0.10);
+        addPeriodic(m_robotContainer.getLimelightBack()::periodic, 0.100, 0.10);
 
         // update swerve odometry with Limelight vision every 100 ms, offset 35 ms.
         addPeriodic(m_robotContainer::updatePoseWithVision, 0.100, 0.035);
         addPeriodic(m_robotContainer::updatePoseWithVisionSide, 0.100, 0.055);
+        addPeriodic(m_robotContainer::updatePoseWithVisionBack, 0.100, 0.055);
     }
 
     @Override
